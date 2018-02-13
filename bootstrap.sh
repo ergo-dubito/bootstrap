@@ -42,7 +42,7 @@ function download_source_files () {
 
 function generate_passphrase () {
   if [[ "$OS" == "macos" ]]; then
-  	which_ "gshuf"
+    which_ "gshuf"
     SHUF="$BIN_PATH/gshuf"
   fi
 
@@ -64,64 +64,64 @@ function get_operating_system () {
     if sw_vers | grep -Eq '[m|M]ac'; then
       OS="macos"
     else
-    	echo "Error: OS unable to be determined."
-    	exit 1
+      echo "Error: OS unable to be determined."
+      exit 1
     fi
   elif [ -f /etc/os-release ]; then
     OS=$("$SED" -n -e 's/^ID=//p' /etc/os-release)
-	elif type lsb_release >/dev/null 2>&1; then
+  elif type lsb_release >/dev/null 2>&1; then
     OS=$(lsb_release -si | "$TR" '[:upper:]' '[:lower:]')
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
   elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
-  	OS="redhat"
+    OS="redhat"
   else
-  	echo "Error: OS not supported."
-  	exit 1
+    echo "Error: OS not supported."
+    exit 1
   fi
 
-	echo "Set operating system as... ${OS}"
+  echo "Set operating system as... ${OS}"
 }
 
 
 function install_stow () {
-	echo "Installing Stow..."
+  echo "Installing Stow..."
 
-	local tmp_fle
-	local tmp_dir
+  local tmp_fle
+  local tmp_dir
 
-	tmp_fle=$(mktemp)
-	tmp_dir=$(mktemp -d)
+  tmp_fle=$(mktemp)
+  tmp_dir=$(mktemp -d)
 
-	curl -L "$STOW_URL" > "$tmp_fle" 2>/dev/null
-	tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
-	pushd "$tmp_dir" >/dev/null
-	./configure --prefix="$HOME"/.local >/dev/null
-	make install >/dev/null
-	popd >/dev/null
+  curl -L "$STOW_URL" > "$tmp_fle" 2>/dev/null
+  tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
+  pushd "$tmp_dir" >/dev/null
+  ./configure --prefix="$HOME"/.local >/dev/null
+  make install >/dev/null
+  popd >/dev/null
 }
 
 
 function which_ () {
-	local bin
-	local found
+  local bin
+  local found
 
-	bin="$1"
-	found=1
+  bin="$1"
+  found=1
 
-	for this_path in "${PATHS[@]}"
-	do
-		if [[ -x "$this_path"/"$bin" ]]; then
-			BIN_PATH="$this_path"
-			found=0
-			break
-		fi
-	done
+  for this_path in "${PATHS[@]}"
+  do
+    if [[ -x "$this_path"/"$bin" ]]; then
+      BIN_PATH="$this_path"
+      found=0
+      break
+    fi
+  done
 
-	if [[ $found -eq 1 ]]; then
-		echo "Error: $bin was not found on the system."
-		exit 1
-	fi
+  if [[ $found -eq 1 ]]; then
+    echo "Error: $bin was not found on the system."
+    exit 1
+  fi
 }
 
 
@@ -175,7 +175,7 @@ if [[ ! -e "$HOME/.ssh/id_ed25519" ]]; then
 fi
 
 if [[ $keep_passphrase -eq "$FALSE" ]]; then
-	rm -f "$PASSPHRASE_FILE"
+  rm -f "$PASSPHRASE_FILE"
 fi
 
 
