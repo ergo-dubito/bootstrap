@@ -47,3 +47,5 @@ echo "%wheel  ALL=(ALL)  NOPASSWD: ALL" | sudo "$TEE" "$SUDOERS_FILE"
 #
 echo "Installing packages..."
 sudo dnf install -yq "${PACKAGES[@]}"
+
+return

@@ -301,3 +301,6 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 "$DEFAULTS" com.apple.terminal FontAntialias -bool true
 "$DEFAULTS" com.apple.terminal ShowActiveProcessInTitle -bool false
 "$DEFAULTS" com.apple.terminal columnCount -float 100.00
+
+
+return
