@@ -11,7 +11,7 @@ set -o nounset
 OS=""
 HOSTNAME=$(hostname)
 
-DATE=$(date +%Y-%m-%d:%H:%M:%S)
+DATE=$(date +%Y%m%d%H%M%S)
 
 DEV_DIR="$HOME/Development"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase"
