@@ -11,6 +11,8 @@ set -o nounset
 OS=""
 HOSTNAME=$(hostname)
 
+DATE=$(date +%Y-%m-%d:%H:%M:%S)
+
 DEV_DIR="$HOME/Development"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase"
 DICT="/usr/share/dict/words"
@@ -44,15 +46,19 @@ function generate_passphrase () {
   fi
 
   "$SHUF" --random-source=/dev/random -n 5 "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
-  chmod 400 "$PASSPHRASE_FILE"
 }
 
 
 function generate_sshkey () {
-  # $1 = key type
+  local comment
+  local file
   local passphrase
+
+  comment="${USER}@${HOSTNAME}"
+  file="$HOME/.ssh/id_$1"
   passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
-  ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "${USER}@${HOSTNAME}"
+
+  ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file"
 }
 
 
@@ -145,6 +151,7 @@ if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
 #
 # Load OS-specific script
 #
+echo "Loading OS specific bootstrap..."
 get_operating_system
 source_remote_file
 
@@ -161,11 +168,19 @@ STOW="$BIN_PATH/stow"
 
 
 #
-# Create SSH keys
+# Generate passphrase
 #
+if [[ -f "$PASSPHRASE_FILE" ]]; then
+  mv "$PASSPHRASE_FILE"{,."$DATE"}
+fi
+
 generate_passphrase
 keep_passphrase="$TRUE"
 
+
+#
+# Create SSH keys
+#
 if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
   echo "Generating rsa SSH key..."
   generate_sshkey "rsa"
@@ -180,6 +195,8 @@ fi
 
 if [[ $keep_passphrase -eq "$FALSE" ]]; then
   rm -f "$PASSPHRASE_FILE"
+else
+  chmod 400 "$PASSPHRASE_FILE"
 fi
 
 
