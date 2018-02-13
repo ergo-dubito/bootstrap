@@ -17,6 +17,7 @@ DICT="/usr/share/dict/words"
 
 STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
+BOOTSTRAP_URL="https://raw.githubusercontent.com/bradleyfrank/bootstrap/master"
 DOTFILES_HTTPS="https://github.com/bradleyfrank/dotfiles.git"
 DOTFILES_GIT="git@github.com:bradleyfrank/dotfiles.git"
 DOTFILES_LOC="$HOME/.dotfiles"
@@ -35,10 +36,6 @@ BIN_PATH=""
 # =========================================================================
 # Functions
 # -------------------------------------------------------------------------
-
-function download_source_files () {
-  
-}
 
 function generate_passphrase () {
   if [[ "$OS" == "macos" ]]; then
@@ -102,6 +99,13 @@ function install_stow () {
 }
 
 
+function source_remote_file () {
+  f=$(mktemp)
+  curl -o "$f" -s -L "$BOOTSTRAP_URL/$OS.sh"
+  source "$f"
+}
+
+
 function which_ () {
   local bin
   local found
@@ -142,7 +146,7 @@ if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
 # Load OS-specific script
 #
 get_operating_system
-. "$OS".sh
+source_remote_file
 
 
 #
@@ -182,7 +186,7 @@ fi
 #
 # Install Powerline
 #
-"$PIP" install --user powerline-status powerline-gitstatus
+"$PIP" install -U --user powerline-status powerline-gitstatus
 
 
 #
