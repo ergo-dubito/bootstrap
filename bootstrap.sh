@@ -58,7 +58,7 @@ function generate_sshkey () {
   file="$HOME/.ssh/id_$1"
   passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
 
-  ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file"
+  ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
 }
 
 
@@ -206,18 +206,24 @@ fi
 # Install Powerline
 #
 echo "Installing Powerline..."
-"$PIP" install -U --user powerline-status powerline-gitstatus
+"$PIP" install -U --user powerline-status powerline-gitstatus >/dev/null 2>&1
 
 
 #
 # Clone dotfiles repo
 #
 echo "Cloning dotfiles repo..."
-"$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC"
-pushd "$DOTFILES_LOC" >/dev/null
-"$GIT" remote set-url origin "$DOTFILES_GIT"
-"$GIT" config core.fileMode false
-popd >/dev/null
+if [[ ! -d "$DOTFILES_LOC" ]]; then
+  "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
+  pushd "$DOTFILES_LOC" >/dev/null
+  "$GIT" remote set-url origin "$DOTFILES_GIT"
+  "$GIT" config core.fileMode false
+  popd >/dev/null
+else
+  pushd "$DOTFILES_LOC" >/dev/null
+  if git status >/dev/null 2>&1; then "$GIT" pull; fi
+  popd >/dev/null
+fi
 
 
 #
@@ -225,16 +231,33 @@ popd >/dev/null
 #
 echo "Checking out local dotfiles repo..."
 pushd "$DOTFILES_LOC" >/dev/null
-"$GIT" checkout -b "$HOSTNAME"
 shopt -s nullglob
-stow_packages=(*/)
-echo "Stowing packages..."
-for pkg in "${stow_packages[@]}"; do
-  "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
-done
-"$GIT" add -A
-"$GIT" commit -m "Default dotfiles for $HOSTNAME."
-"$GIT" checkout master
+
+if git branch --list | grep -q $HOSTNAME; then
+  stow_packages=(*/)
+  echo -n "Stowing packages... "
+  for pkg in "${stow_packages[@]}"; do
+    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$pkg"
+  done
+  echo "done."
+else
+  "$GIT" checkout -b "$HOSTNAME"
+  stow_packages=(*/)
+  echo -n "Stowing packages... "
+  for pkg in "${stow_packages[@]}"; do
+    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
+  done
+  echo "done."
+  "$GIT" add -A
+  "$GIT" commit -m "Default dotfiles for $HOSTNAME."
+  "$GIT" checkout master
+fi
+
 popd >/dev/null
 
+
+#
+# Fix file permissions
+#
+chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
 chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
