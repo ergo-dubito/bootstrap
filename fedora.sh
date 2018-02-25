@@ -17,7 +17,6 @@ PACKAGES=(
   nmap
   p7zip
   python3
-  rename
   ssh-copy-id
   stow
   thefuck
