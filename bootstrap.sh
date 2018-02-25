@@ -181,6 +181,8 @@ keep_passphrase="$TRUE"
 #
 # Create SSH keys
 #
+echo "Checking for SSH keys..."
+
 if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
   echo "Generating rsa SSH key..."
   generate_sshkey "rsa"
@@ -203,12 +205,14 @@ fi
 #
 # Install Powerline
 #
+echo "Installing Powerline..."
 "$PIP" install -U --user powerline-status powerline-gitstatus
 
 
 #
 # Clone dotfiles repo
 #
+echo "Cloning dotfiles repo..."
 "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC"
 pushd "$DOTFILES_LOC" >/dev/null
 "$GIT" remote set-url origin "$DOTFILES_GIT"
@@ -219,10 +223,12 @@ popd >/dev/null
 #
 # Stow packages
 #
+echo "Checking out local dotfiles repo..."
 pushd "$DOTFILES_LOC" >/dev/null
 "$GIT" checkout -b "$HOSTNAME"
 shopt -s nullglob
 stow_packages=(*/)
+echo "Stowing packages..."
 for pkg in "${stow_packages[@]}"; do
   "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
 done
