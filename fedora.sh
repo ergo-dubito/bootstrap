@@ -48,6 +48,10 @@ fi
 #
 for package in "${PACKAGES[@]}"
 do
-  echo "Installing $package..."
-  sudo dnf install -yq "$package" >/dev/null
+  echo -n "Installing $package..."
+  if sudo dnf install -yq "$package" >/dev/null; then
+    echo "done."
+  else
+    echo "failed."
+  fi
 done
