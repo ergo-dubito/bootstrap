@@ -17,7 +17,6 @@ PACKAGES=(
   nmap
   p7zip
   python3
-  ssh-copy-id
   stow
   thefuck
   tldr
