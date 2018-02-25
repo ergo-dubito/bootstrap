@@ -48,8 +48,8 @@ fi
 #
 # Install packages
 #
-echo "Installing packages..."
 for package in "${PACKAGES[@]}"
 do
+  echo "Installing $package..."
   sudo dnf install -yq "$package" >/dev/null
 done
