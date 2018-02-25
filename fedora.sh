@@ -8,6 +8,7 @@ TEE=$(which tee)
 # -------------------------------------------------------------------------
 
 SUDOERS_FILE="/etc/sudoers.d/nopasswd"
+SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 
 PACKAGES=(
   git
@@ -39,7 +40,9 @@ PACKAGES=(
 # Main
 # -------------------------------------------------------------------------
 
-echo "%wheel  ALL=(ALL)  NOPASSWD: ALL" | sudo "$TEE" "$SUDOERS_FILE"
+if [[ ! -e "$SUDOERS_FILE" ]]; then
+  echo "$SUODERS_RULE" | sudo "$TEE" "$SUDOERS_FILE" >/dev/null
+fi
 
 
 #
@@ -50,5 +53,3 @@ for package in "${PACKAGES[@]}"
 do
   sudo dnf install -yq "$package" >/dev/null
 done
-
-return

@@ -108,7 +108,7 @@ function install_stow () {
 function source_remote_file () {
   f=$(mktemp)
   curl -o "$f" -s -L "$BOOTSTRAP_URL/$OS.sh"
-  source "$f"
+  (. "$f")
 }
 
 
@@ -220,9 +220,15 @@ popd >/dev/null
 # Stow packages
 #
 pushd "$DOTFILES_LOC" >/dev/null
+"$GIT" checkout -b "$HOSTNAME"
 shopt -s nullglob
 stow_packages=(*/)
 for pkg in "${stow_packages[@]}"; do
-  "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$pkg"
+  "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
 done
+"$GIT" add -A
+"$GIT" commit -m "Default dotfiles for $HOSTNAME."
+"$GIT" checkout master
 popd >/dev/null
+
+chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
