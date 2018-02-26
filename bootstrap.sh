@@ -36,6 +36,17 @@ BIN_PATH=""
 
 
 # =========================================================================
+# Packages
+# -------------------------------------------------------------------------
+
+PYTHON_PACKAGES=(
+  powerline-status
+  powerline-gitstatus
+  pydf
+)
+
+
+# =========================================================================
 # Functions
 # -------------------------------------------------------------------------
 
@@ -100,7 +111,7 @@ function install_stow () {
   tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
   pushd "$tmp_dir" >/dev/null
   ./configure --prefix="$HOME"/.local >/dev/null
-  make install >/dev/null
+  make && make install >/dev/null
   popd >/dev/null
 }
 

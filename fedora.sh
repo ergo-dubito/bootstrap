@@ -10,10 +10,16 @@ TEE=$(which tee)
 SUDOERS_FILE="/etc/sudoers.d/nopasswd"
 SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 
+
+# =========================================================================
+# Packages
+# -------------------------------------------------------------------------
+
 PACKAGES=(
   git
   htop
   mosh
+  ncdu
   nmap
   p7zip
   python3

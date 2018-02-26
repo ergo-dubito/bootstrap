@@ -8,6 +8,11 @@
 BREW_URL="https://raw.githubusercontent.com/Homebrew/install/master/install"
 DEFAULTS="/usr/bin/defaults write"
 
+
+# =========================================================================
+# Packages
+# -------------------------------------------------------------------------
+
 PACKAGES=(
   bash-completion2
   coreutils
@@ -15,6 +20,7 @@ PACKAGES=(
   heroku
   markdown
   mosh
+  ncdu
   nmap
   p7zip
   python3
