@@ -187,8 +187,6 @@ fi
 #
 # Load OS-specific script
 #
-echo ""
-echo "__ Loading OS Bootstrap __"
 get_operating_system
 source_remote_file
 

@@ -49,6 +49,10 @@ if [[ ! -e "$SUDOERS_FILE" ]]; then
 fi
 
 
+echo ""
+echo "__ Installing Packages __"
+
+
 #
 # Install packages
 #
