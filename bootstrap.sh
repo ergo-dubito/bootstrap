@@ -50,10 +50,35 @@ PYTHON_PACKAGES=(
 # Functions
 # -------------------------------------------------------------------------
 
+function clone_dotfiles_repo () {
+  echo -n "Cloning dotfiles repo... "
+  "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
+  pushd "$DOTFILES_LOC" >/dev/null
+  "$GIT" remote set-url origin "$DOTFILES_GIT"
+  "$GIT" config core.fileMode false
+  popd >/dev/null
+  echo "done"
+
+  fix_permissions
+}
+
+
+function fix_permissions () {
+  echo -n "Fixing permissions in dotfiles repo... "
+  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
+  chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
+  echo "done"
+}
+
+
 function generate_passphrase () {
   if [[ "$OS" == "macos" ]]; then
-    which_ "gshuf"
+    whichever "gshuf"
     SHUF="$BIN_PATH/gshuf"
+  fi
+
+  if [[ -f "$PASSPHRASE_FILE" ]]; then
+    mv "$PASSPHRASE_FILE"{,."$DATE"}
   fi
 
   "$SHUF" --random-source=/dev/random -n 5 "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
@@ -75,7 +100,7 @@ function generate_sshkey () {
 
 function get_operating_system () {
   if type sw_vers >/dev/null 2>&1; then
-    if sw_vers | grep -Eq '[m|M]ac'; then
+    if sw_vers | grep -iq 'mac'; then
       OS="macos"
     else
       echo "Error: OS unable to be determined."
@@ -94,12 +119,12 @@ function get_operating_system () {
     exit 1
   fi
 
-  echo "Set operating system as... ${OS}"
+  echo "Detected OS: ${OS}"
 }
 
 
 function install_stow () {
-  echo "Installing Stow..."
+  echo -m "Installing Stow... "
 
   local tmp_fle
   local tmp_dir
@@ -113,6 +138,8 @@ function install_stow () {
   ./configure --prefix="$HOME"/.local >/dev/null
   make && make install >/dev/null
   popd >/dev/null
+
+  echo "done"
 }
 
 
@@ -123,26 +150,19 @@ function source_remote_file () {
 }
 
 
-function which_ () {
-  local bin
-  local found
+function whichever () {
+  BIN_PATH="NaN"
 
+  local bin
   bin="$1"
-  found=1
 
   for this_path in "${PATHS[@]}"
   do
     if [[ -x "$this_path"/"$bin" ]]; then
       BIN_PATH="$this_path"
-      found=0
       break
     fi
   done
-
-  if [[ $found -eq 1 ]]; then
-    echo "Error: $bin was not found on the system."
-    exit 1
-  fi
 }
 
 
@@ -150,19 +170,25 @@ function which_ () {
 # Main
 # -------------------------------------------------------------------------
 
-echo "Starting bootstrap..."
+echo ""
+echo "__ Starting Bootstrap __"
 
 
 #
 # Create environment
 #
-if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
+if [[ ! -d "$DEV_DIR" ]]; then
+  echo -n "Making dev environment... "
+  mkdir "$DEV_DIR"
+  echo "done"
+fi
 
 
 #
 # Load OS-specific script
 #
-echo "Loading OS specific bootstrap..."
+echo ""
+echo "__ Loading OS Bootstrap __"
 get_operating_system
 source_remote_file
 
@@ -170,40 +196,68 @@ source_remote_file
 #
 # Set paths for various packages
 #
-which_ "pip3"
-PIP="$BIN_PATH/pip3"
-which_ "git"
-GIT="$BIN_PATH/git"
-which_ "stow"
-STOW="$BIN_PATH/stow"
+echo ""
+echo "__ Finding Executable Paths __"
 
-
-#
-# Generate passphrase
-#
-if [[ -f "$PASSPHRASE_FILE" ]]; then
-  mv "$PASSPHRASE_FILE"{,."$DATE"}
+whichever "pip3"
+if "$BIN_PATH" != "NaN"; then
+  PIP="$BIN_PATH/pip3"
+else
+  whichever "pip"
+  if "$BIN_PATH" != "NaN"; then
+    PIP="$BIN_PATH/pip"
+  else
+    echo "Error: \`pip\` not found."
+    exit 1
+  fi
 fi
 
-generate_passphrase
-keep_passphrase="$TRUE"
+echo "  Found \`pip\` at $PIP"
+
+whichever "git"
+if "$BIN_PATH" != "NaN"; then
+  GIT="$BIN_PATH/git"
+else
+  echo "Error: \`git\` not found."
+  exit 1
+fi
+
+echo "  Found \`git\` at $GIT"
+
+whichever "stow"
+if "$BIN_PATH" != "NaN"; then
+  STOW="$BIN_PATH/stow"
+else
+  echo "Error: \`stow\` not found."
+  exit 1
+fi
+
+echo "  Found \`stow\` at $STOW"
 
 
 #
 # Create SSH keys
 #
-echo "Checking for SSH keys..."
+echo ""
+echo "__ Checking For SSH Keys __"
+
+echo -n "Generating secure passphrase... "
+generate_passphrase
+echo "done"
+keep_passphrase="$FALSE"
 
 if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
-  echo "Generating rsa SSH key..."
+  echo -n "Generating rsa SSH key... "
   generate_sshkey "rsa"
-  keep_passphrase="$FALSE"
+  keep_passphrase="$TRUE"
+  echo "done"
 fi
 
 if [[ ! -e "$HOME/.ssh/id_ed25519" ]]; then
-  echo "Generating ed25519 SSH key..."
+  echo -n "Generating ed25519 SSH key... "
   generate_sshkey "ed25519"
-  keep_passphrase="$FALSE"
+  keep_passphrase="$TRUE"
+  echo "done"
 fi
 
 if [[ $keep_passphrase -eq "$FALSE" ]]; then
@@ -214,26 +268,27 @@ fi
 
 
 #
-# Install Powerline
+# Install Python packages
 #
-echo "Installing Powerline..."
-"$PIP" install -U --user powerline-status powerline-gitstatus >/dev/null 2>&1
+for pypkg in "${PYTHON_PACKAGES[@]}"
+do
+  echo -n "Installing $pypkg... "
+  if "$PIP" install -U --user "$pypkg" -qqq 2>/dev/null; then
+    echo "done"
+  else
+    echo "failed"
+  fi
+done
 
 
 #
 # Clone dotfiles repo
 #
-echo "Cloning dotfiles repo..."
 if [[ ! -d "$DOTFILES_LOC" ]]; then
-  "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
-  pushd "$DOTFILES_LOC" >/dev/null
-  "$GIT" remote set-url origin "$DOTFILES_GIT"
-  "$GIT" config core.fileMode false
-  popd >/dev/null
+  clone_dotfiles_repo
 else
-  pushd "$DOTFILES_LOC" >/dev/null
-  if git status >/dev/null 2>&1; then "$GIT" pull; fi
-  popd >/dev/null
+  rm -rf "$HOME"/.dotfiles
+  clone_dotfiles_repo
 fi
 
 
@@ -244,21 +299,21 @@ echo "Checking out local dotfiles repo..."
 pushd "$DOTFILES_LOC" >/dev/null
 shopt -s nullglob
 
-if git branch --list | grep -q $HOSTNAME; then
+if git branch --list | grep -q "$HOSTNAME"; then
   stow_packages=(*/)
-  echo -n "Stowing packages... "
   for pkg in "${stow_packages[@]}"; do
+    echo -n "Stowing $pkg... "
     "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$pkg"
+    echo "done"
   done
-  echo "done."
 else
   "$GIT" checkout -b "$HOSTNAME"
   stow_packages=(*/)
-  echo -n "Stowing packages... "
   for pkg in "${stow_packages[@]}"; do
+    echo -n "Stowing $pkg... "
     "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
+    echo "done"
   done
-  echo "done."
   "$GIT" add -A
   "$GIT" commit -m "Default dotfiles for $HOSTNAME."
   "$GIT" checkout master
@@ -266,9 +321,3 @@ fi
 
 popd >/dev/null
 
-
-#
-# Fix file permissions
-#
-chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
-chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain

@@ -54,10 +54,10 @@ fi
 #
 for package in "${PACKAGES[@]}"
 do
-  echo -n "Installing $package..."
+  echo -n "Installing $package... "
   if sudo dnf install -yq "$package" >/dev/null; then
-    echo "done."
+    echo "done"
   else
-    echo "failed."
+    echo "failed"
   fi
 done
