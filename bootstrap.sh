@@ -240,7 +240,7 @@ echo "Found \`stow\` at $STOW"
 echo ""
 echo "__ Checking For SSH Keys __"
 
-echo -n "Generating secure passphrase... "
+echo -n "Generating passphrase... "
 generate_passphrase
 echo "done"
 keep_passphrase="$FALSE"
@@ -261,8 +261,10 @@ fi
 
 if [[ $keep_passphrase -eq "$FALSE" ]]; then
   rm -f "$PASSPHRASE_FILE"
+  echo "Removed temporary passphrase."
 else
   chmod 400 "$PASSPHRASE_FILE"
+  echo "Saved passphrase to $PASSPHRASE_FILE."
 fi
 
 
@@ -304,6 +306,7 @@ pushd "$DOTFILES_LOC" >/dev/null
 shopt -s nullglob
 
 if git branch --list | grep -q "$HOSTNAME"; then
+  "$GIT" checkout master >/dev/null
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)

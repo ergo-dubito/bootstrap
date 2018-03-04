@@ -54,23 +54,19 @@ if [[ ! -e "$SUDOERS_FILE" ]]; then
 fi
 
 
-echo ""
-echo "__ Installing Packages __"
-
-#
-# Install repos
-#
-sudo dnf config-manager --add-repo="$REPO_NEGATIVO"
-sudo dnf clean all
-
-
 #
 # Install packages
 #
+echo ""
+echo "__ Installing Packages __"
+
+sudo dnf config-manager --add-repo="$REPO_NEGATIVO"
+sudo dnf clean all >/dev/null
+
 for package in "${PACKAGES[@]}"
 do
   echo -n "Installing $package... "
-  if sudo dnf install -yq "$package" 2>/dev/null; then
+  if sudo dnf install -yq "$package" >/dev/null 2>&1; then
     echo "done"
   else
     echo "failed"
