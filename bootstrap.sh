@@ -3,9 +3,9 @@
 set -e
 set -o nounset
 
-# =========================================================================
+# ==============================================================================
 # Variables
-# -------------------------------------------------------------------------
+# ==============================================================================
 
 OS=""
 HOSTNAME=$(hostname)
@@ -38,9 +38,9 @@ PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH=""
 
 
-# =========================================================================
+# ==============================================================================
 # Packages
-# -------------------------------------------------------------------------
+# ==============================================================================
 
 PYTHON_PACKAGES=(
   powerline-status
@@ -49,9 +49,9 @@ PYTHON_PACKAGES=(
 )
 
 
-# =========================================================================
+# ==============================================================================
 # Functions
-# -------------------------------------------------------------------------
+# ==============================================================================
 
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
@@ -69,6 +69,7 @@ function clone_dotfiles_repo () {
 function fix_permissions () {
   echo -n "Fixing file permissions... "
   chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
+  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/authorized_keys
   chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
   echo "done"
 }
@@ -89,7 +90,9 @@ function generate_passphrase () {
     mv "$PASSPHRASE_FILE"{,."$DATE"}
   fi
 
+  echo -n "Generating passphrase... "
   "$SHUF" --random-source=/dev/random -n 5 "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
+  echo "done"
 }
 
 
@@ -98,11 +101,18 @@ function generate_sshkey () {
   local file
   local passphrase
 
-  comment="${USER}@${HOSTNAME}"
   file="$HOME/.ssh/id_$1"
-  passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
 
-  ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
+  if [[ -e "$file" ]]; then
+    echo -n "Generating $1 SSH key... "
+
+    comment="${USER}@${HOSTNAME}"
+    passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
+
+    ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
+
+    echo "done"
+  fi
 }
 
 
@@ -185,17 +195,17 @@ function whichever () {
 }
 
 
-# =========================================================================
+# ==============================================================================
 # Main
-# -------------------------------------------------------------------------
+# ==============================================================================
 
 echo ""
 echo "__ Starting Bootstrap __"
 
 
-#
+# ------------------------------------------------------------------------------
 # Create environment
-#
+# ------------------------------------------------------------------------------
 if [[ ! -d "$DEV_DIR" ]]; then
   echo -n "Making dev environment... "
   mkdir "$DEV_DIR"
@@ -203,16 +213,16 @@ if [[ ! -d "$DEV_DIR" ]]; then
 fi
 
 
-#
+# ------------------------------------------------------------------------------
 # Load OS-specific script
-#
+# ------------------------------------------------------------------------------
 get_operating_system
 source_remote_file
 
 
-#
+# ------------------------------------------------------------------------------
 # Set paths for various packages
-#
+# ------------------------------------------------------------------------------
 echo ""
 echo "__ Finding Executable Paths __"
 
@@ -252,9 +262,9 @@ fi
 echo "Found \`stow\` at $STOW"
 
 
-#
+# ------------------------------------------------------------------------------
 # Install Python packages
-#
+# ------------------------------------------------------------------------------
 echo ""
 echo "__ Installing Python Packages __"
 
@@ -269,9 +279,9 @@ do
 done
 
 
-#
+# ------------------------------------------------------------------------------
 # Clone dotfiles repo
-#
+# ------------------------------------------------------------------------------
 echo ""
 echo "__ Installing Dotfile Customizations __"
 
@@ -296,9 +306,9 @@ else
 fi
 
 
-#
+# ------------------------------------------------------------------------------
 # Stow packages
-#
+# ------------------------------------------------------------------------------
 pushd "$DOTFILES_LOC" >/dev/null
 shopt -s nullglob
 
@@ -328,38 +338,29 @@ fi
 popd >/dev/null
 
 
-#
+# ------------------------------------------------------------------------------
 # Various SSH configurations
-#
+# ------------------------------------------------------------------------------
 echo ""
 echo "__ Configuring SSH __"
 
 # Set some variables
 authkeys="$DOTFILES_LOC/ssh/.ssh/authorized_keys"
 known_hosts="$HOME/.ssh/known_hosts"
-ssh_create_files=("$authkeys" "$known_hosts")
 
-# Generate a temporary secure passphrase
-echo -n "Generating passphrase... "
-generate_passphrase
-echo "done"
+ssh_create_files=("$authkeys" "$known_hosts")
+sshkeys=("rsa" "ed25519")
+
 keep_passphrase="$FALSE"
 
-# Generate RSA key
-if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
-  echo -n "Generating rsa SSH key... "
-  generate_sshkey "rsa"
-  keep_passphrase="$TRUE"
-  echo "done"
-fi
+# Generate a temporary secure passphrase
+generate_passphrase
 
-# Generate ed25519 key
-if [[ ! -e "$HOME/.ssh/id_ed25519" ]]; then
-  echo -n "Generating ed25519 SSH key... "
-  generate_sshkey "ed25519"
+# Loop through keys to generate
+for sshkey in "${sshkeys[@]}"; do
+  generate_sshkey "$sshkey"
   keep_passphrase="$TRUE"
-  echo "done"
-fi
+done
 
 # Save or delete temporary passphrase
 if [[ $keep_passphrase -eq "$FALSE" ]]; then
@@ -402,7 +403,6 @@ for key in "${keys[@]}"; do
   publickey=$(<"$HOME"/.ssh/"$key" "$TR" -d '\n')
 
   if ! grep -rq "$publickey" "$authkeys"; then
-    #sed -i '' -e '$a\' "$authkeys"
     echo -n "Adding $key... "
     echo "$publickey" >> "$authkeys"
     echo "done"
@@ -418,7 +418,17 @@ if [[ "$commit" -eq "$TRUE" ]]; then
   "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
 fi
 
-#
+# ------------------------------------------------------------------------------
 # Exit
-#
+# ------------------------------------------------------------------------------
+echo ""
+echo "__ Finishing Up __"
+echo ""
+echo -n " * Add ssh key to GitHub: "
+if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
+  cat "$HOME/.ssh/id_ed25519.pub"
+else
+  cat "$HOME/.ssh/id_rsa.pub"
+fi
+echo " * Push dotfile repo updates"
 exit 0
