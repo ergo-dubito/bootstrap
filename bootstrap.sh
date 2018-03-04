@@ -3,7 +3,6 @@
 set -e
 set -o nounset
 
-
 # =========================================================================
 # Variables
 # -------------------------------------------------------------------------
@@ -64,7 +63,7 @@ function clone_dotfiles_repo () {
 
 
 function fix_permissions () {
-  echo -n "Fixing permissions in dotfiles repo... "
+  echo -n "Fixing file permissions... "
   chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
   chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
   echo "done"
@@ -321,13 +320,59 @@ else
     "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$_pkg"
     echo "done"
   done
-  "$GIT" add -A
-  "$GIT" commit -m "Default dotfiles for $HOSTNAME."
-  "$GIT" checkout master
+  "$GIT" add -A >/dev/null
+  "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null
+  "$GIT" checkout master >/dev/null
 fi
 
 popd >/dev/null
 
+
+#
+# Add to authorized_keys
+#
+echo ""
+echo "__ Configuring SSH __"
+
+authkeys="$DOTFILES_LOC/ssh/.ssh/authorized_keys"
+
+# Create authorized_keys if necessary
+if [[ ! -f "$authkeys" ]]; then
+  echo -n "Creating authorized_keys file... "
+  if touch "$authkeys"; then
+    chmod 600 "$authkeys"
+    echo "done"
+  else
+    echo "failed"
+    exit 1
+  fi
+fi
+
+pushd "$HOME"/.ssh >/dev/null
+
+commit="$FALSE"
+shopt -s nullglob
+keys=(*.pub)
+
+for key in "${keys[@]}"; do
+  publickey=$(<"$HOME"/.ssh/"$key" "$TR" -d '\n')
+
+  if ! grep -rq "$publickey" "$authkeys"; then
+    #sed -i '' -e '$a\' "$authkeys"
+    echo -n "Adding $key... "
+    echo "$publickey" >> "$authkeys"
+    echo "done"
+    commit="$TRUE"
+  fi
+done
+
+popd >/dev/null
+
+if [[ "$commit" -eq "$TRUE" ]]; then
+  pushd "$DOTFILES_LOC" >/dev/null
+  "$GIT" add "$authkeys" >/dev/null
+  "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
+fi
 
 #
 # Exit
