@@ -307,7 +307,7 @@ shopt -s nullglob
 if git branch --list | grep -q "$HOSTNAME"; then
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
-    $_pkg=$(echo "$pkg" | cut -d '/' -f 1)
+    _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
     "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$_pkg"
     echo "done"
@@ -316,7 +316,7 @@ else
   "$GIT" checkout -b "$HOSTNAME"
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
-    $_pkg=$(echo "$pkg" | cut -d '/' -f 1)
+    _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
     "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$_pkg"
     echo "done"
