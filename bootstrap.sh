@@ -77,6 +77,11 @@ function generate_passphrase () {
     SHUF="$BIN_PATH/gshuf"
   fi
 
+  if [[ ! -d "$HOME"/ssh ]]; then
+    mkdir "$HOME"/ssh
+    chmod 700 "$HOME"/ssh
+  fi
+
   if [[ -f "$PASSPHRASE_FILE" ]]; then
     mv "$PASSPHRASE_FILE"{,."$DATE"}
   fi
