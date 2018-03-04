@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-
-TEE=$(which tee)
-
 # =========================================================================
 # Variables
 # -------------------------------------------------------------------------
@@ -10,14 +7,22 @@ TEE=$(which tee)
 SUDOERS_FILE="/etc/sudoers.d/nopasswd"
 SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 
+REPO_NEGATIVO="https://negativo17.org/repos/fedora-multimedia.repo"
+
+TEE=$(which tee)
+
 
 # =========================================================================
 # Packages
 # -------------------------------------------------------------------------
 
 PACKAGES=(
+  ffmpeg
   git
+  HandBrake-cli
   htop
+  libdvdcss
+  makemkv
   mosh
   ncdu
   nmap
@@ -52,6 +57,12 @@ fi
 echo ""
 echo "__ Installing Packages __"
 
+#
+# Install repos
+#
+sudo dnf config-manager --add-repo="$REPO_NEGATIVO"
+sudo dnf clean all
+
 
 #
 # Install packages
@@ -59,7 +70,7 @@ echo "__ Installing Packages __"
 for package in "${PACKAGES[@]}"
 do
   echo -n "Installing $package... "
-  if sudo dnf install -yq "$package" >/dev/null; then
+  if sudo dnf install -yq "$package" 2>/dev/null; then
     echo "done"
   else
     echo "failed"
