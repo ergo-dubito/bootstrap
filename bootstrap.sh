@@ -265,6 +265,9 @@ fi
 #
 # Install Python packages
 #
+echo ""
+echo "__ Installing Python Packages __"
+
 for pypkg in "${PYTHON_PACKAGES[@]}"
 do
   echo -n "Installing $pypkg... "
@@ -279,6 +282,9 @@ done
 #
 # Clone dotfiles repo
 #
+echo ""
+echo "__ Installing Dotfile Customizations __"
+
 if [[ ! -d "$DOTFILES_LOC" ]]; then
   clone_dotfiles_repo
 else
@@ -290,23 +296,24 @@ fi
 #
 # Stow packages
 #
-echo "Checking out local dotfiles repo..."
 pushd "$DOTFILES_LOC" >/dev/null
 shopt -s nullglob
 
 if git branch --list | grep -q "$HOSTNAME"; then
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
-    echo -n "Stowing $pkg... "
-    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$pkg"
+    $_pkg=$(echo "$pkg" | cut -d '/' -f 1)
+    echo -n "Stowing $_pkg... "
+    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$_pkg"
     echo "done"
   done
 else
   "$GIT" checkout -b "$HOSTNAME"
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
-    echo -n "Stowing $pkg... "
-    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$pkg"
+    $_pkg=$(echo "$pkg" | cut -d '/' -f 1)
+    echo -n "Stowing $_pkg... "
+    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$_pkg"
     echo "done"
   done
   "$GIT" add -A
@@ -316,3 +323,8 @@ fi
 
 popd >/dev/null
 
+
+#
+# Exit
+#
+exit 0
