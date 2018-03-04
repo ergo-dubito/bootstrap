@@ -60,8 +60,14 @@ fi
 echo ""
 echo "__ Installing Packages __"
 
-sudo dnf config-manager --add-repo="$REPO_NEGATIVO"
+echo -n "Adding repo: negativo17 - Multimedia... "
+sudo dnf config-manager --add-repo="$REPO_NEGATIVO" >/dev/null
+echo "done"
+
+echo -n "Cleaning up repo cache... "
 sudo dnf clean all >/dev/null
+sudo dnf makecache >/dev/null
+echo "done"
 
 for package in "${PACKAGES[@]}"
 do
