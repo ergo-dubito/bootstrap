@@ -23,6 +23,10 @@ DOTFILES_HTTPS="https://github.com/bradleyfrank/dotfiles.git"
 DOTFILES_GIT="git@github.com:bradleyfrank/dotfiles.git"
 DOTFILES_LOC="$HOME/.dotfiles"
 
+# GitHub RSA SHA256 fingerprint
+# https://help.github.com/articles/github-s-ssh-key-fingerprints/
+GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
+
 SED=$(which sed)
 TR=$(which tr)
 SHUF=$(which shuf)
@@ -154,6 +158,20 @@ function source_remote_file () {
 }
 
 
+function touch_file () {
+  if [[ ! -f "$1" ]]; then
+    echo -n "Creating file $1... "
+    if touch "$1"; then
+      chmod "$2" "$1"
+      echo "done"
+    else
+      echo "failed"
+      exit 1
+    fi
+  fi
+}
+
+
 function whichever () {
   BIN_PATH="NaN"
 
@@ -235,40 +253,6 @@ echo "Found \`stow\` at $STOW"
 
 
 #
-# Create SSH keys
-#
-echo ""
-echo "__ Checking For SSH Keys __"
-
-echo -n "Generating passphrase... "
-generate_passphrase
-echo "done"
-keep_passphrase="$FALSE"
-
-if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
-  echo -n "Generating rsa SSH key... "
-  generate_sshkey "rsa"
-  keep_passphrase="$TRUE"
-  echo "done"
-fi
-
-if [[ ! -e "$HOME/.ssh/id_ed25519" ]]; then
-  echo -n "Generating ed25519 SSH key... "
-  generate_sshkey "ed25519"
-  keep_passphrase="$TRUE"
-  echo "done"
-fi
-
-if [[ $keep_passphrase -eq "$FALSE" ]]; then
-  rm -f "$PASSPHRASE_FILE"
-  echo "Removed temporary passphrase."
-else
-  chmod 400 "$PASSPHRASE_FILE"
-  echo "Saved passphrase to $PASSPHRASE_FILE."
-fi
-
-
-#
 # Install Python packages
 #
 echo ""
@@ -345,25 +329,69 @@ popd >/dev/null
 
 
 #
-# Add to authorized_keys
+# Various SSH configurations
 #
 echo ""
 echo "__ Configuring SSH __"
 
+# Set some variables
 authkeys="$DOTFILES_LOC/ssh/.ssh/authorized_keys"
+known_hosts="$HOME/.ssh/known_hosts"
+ssh_create_files=("$authkeys" "$known_hosts")
 
-# Create authorized_keys if necessary
-if [[ ! -f "$authkeys" ]]; then
-  echo -n "Creating authorized_keys file... "
-  if touch "$authkeys"; then
-    chmod 600 "$authkeys"
-    echo "done"
-  else
-    echo "failed"
-    exit 1
-  fi
+# Generate a temporary secure passphrase
+echo -n "Generating passphrase... "
+generate_passphrase
+echo "done"
+keep_passphrase="$FALSE"
+
+# Generate RSA key
+if [[ ! -e "$HOME/.ssh/id_rsa" ]]; then
+  echo -n "Generating rsa SSH key... "
+  generate_sshkey "rsa"
+  keep_passphrase="$TRUE"
+  echo "done"
 fi
 
+# Generate ed25519 key
+if [[ ! -e "$HOME/.ssh/id_ed25519" ]]; then
+  echo -n "Generating ed25519 SSH key... "
+  generate_sshkey "ed25519"
+  keep_passphrase="$TRUE"
+  echo "done"
+fi
+
+# Save or delete temporary passphrase
+if [[ $keep_passphrase -eq "$FALSE" ]]; then
+  rm -f "$PASSPHRASE_FILE"
+  echo "Removed temporary passphrase."
+else
+  chmod 400 "$PASSPHRASE_FILE"
+  echo "Saved passphrase to $PASSPHRASE_FILE."
+fi
+
+# Create required SSH files
+for ssh_file in "${ssh_create_files[@]}"; do
+  touch_file "$ssh_file" "0600"
+done
+
+# Add GitHub to known_hosts
+keyscan=$(ssh-keyscan github.com 2>/dev/null)
+fingerprint=$(ssh-keygen -lf <(echo "$keyscan") | cut -d ' ' -f 2)
+
+if [[ "$fingerprint" == "$GITHUB_FINGERPRINT" ]]; then
+  key="$(echo "$keyscan" | cut -d ' ' -f 3)"
+  if ! grep -qr "$key" "$known_hosts" 2>/dev/null; then
+    echo -n "Adding GitHub SSH key to known_hosts... "
+    echo "$keyscan" >> "$known_hosts"
+    echo "done"
+  fi
+else
+  echo "Error: GitHub SSH key fingerprints do not match."
+  exit 1
+fi
+
+# Add public keys to authorized_keys
 pushd "$HOME"/.ssh >/dev/null
 
 commit="$FALSE"
