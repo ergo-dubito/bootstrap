@@ -294,8 +294,21 @@ echo "__ Installing Dotfile Customizations __"
 if [[ ! -d "$DOTFILES_LOC" ]]; then
   clone_dotfiles_repo
 else
-  rm -rf "$HOME"/.dotfiles
-  clone_dotfiles_repo
+  pushd "$DOTFILES_LOC" >/dev/null
+  if ! git status >/dev/null 2>&1; then
+    popd >/dev/null
+    rm -rf "$DOTFILES_LOC"
+    clone_dotfiles_repo
+  else
+    echo -n "Attempting to pull latest changes... "
+    "$GIT" checkout master >/dev/null
+    if "$GIT" pull >/dev/null 2>&1; then
+      echo "done"
+    else
+      echo "failed"
+    fi
+    popd >/dev/null
+  fi
 fi
 
 
