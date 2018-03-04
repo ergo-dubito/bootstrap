@@ -284,12 +284,12 @@ else
     rm -rf "$DOTFILES_LOC"
     clone_dotfiles_repo
   else
-    echo -n "Attempting to pull latest changes... "
-    "$GIT" checkout master >/dev/null
+    echo -n "Updating repo... "
+    "$GIT" checkout master >/dev/null 2>&1
     if "$GIT" pull >/dev/null 2>&1; then
       echo "done"
     else
-      echo "failed"
+      echo "failed (but no problem)"
     fi
     popd >/dev/null
   fi
@@ -303,7 +303,7 @@ pushd "$DOTFILES_LOC" >/dev/null
 shopt -s nullglob
 
 if git branch --list | grep -q "$HOSTNAME"; then
-  "$GIT" checkout master >/dev/null
+  "$GIT" checkout master >/dev/null 2>&1
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
