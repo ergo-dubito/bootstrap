@@ -31,7 +31,7 @@ SHUF=$(which shuf)
 TRUE=0
 FALSE=1
 
-PATHS=("/usr/bin" "/bin" "/usr/local/bin" "$HOME/.local/bin")
+PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH=""
 
 
@@ -153,12 +153,9 @@ function source_remote_file () {
 function whichever () {
   BIN_PATH="NaN"
 
-  local bin
-  bin="$1"
-
   for this_path in "${PATHS[@]}"
   do
-    if [[ -x "$this_path"/"$bin" ]]; then
+    if [[ -x "$this_path"/"$1" ]]; then
       BIN_PATH="$this_path"
       break
     fi
@@ -198,7 +195,7 @@ echo ""
 echo "__ Finding Executable Paths __"
 
 whichever "pip3"
-if "$BIN_PATH" != "NaN"; then
+if [[ "$BIN_PATH" != "NaN" ]]; then
   PIP="$BIN_PATH/pip3"
 else
   whichever "pip"
@@ -210,27 +207,27 @@ else
   fi
 fi
 
-echo "  Found \`pip\` at $PIP"
+echo "Found \`pip\` at $PIP"
 
 whichever "git"
-if "$BIN_PATH" != "NaN"; then
+if [[ "$BIN_PATH" != "NaN" ]]; then
   GIT="$BIN_PATH/git"
 else
   echo "Error: \`git\` not found."
   exit 1
 fi
 
-echo "  Found \`git\` at $GIT"
+echo "Found \`git\` at $GIT"
 
 whichever "stow"
-if "$BIN_PATH" != "NaN"; then
+if [[ "$BIN_PATH" != "NaN" ]]; then
   STOW="$BIN_PATH/stow"
 else
   echo "Error: \`stow\` not found."
   exit 1
 fi
 
-echo "  Found \`stow\` at $STOW"
+echo "Found \`stow\` at $STOW"
 
 
 #
