@@ -7,21 +7,30 @@
 SUDOERS_FILE="/etc/sudoers.d/nopasswd"
 SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 
-REPO_NEGATIVO="https://negativo17.org/repos/fedora-multimedia.repo"
-
 TEE=$(which tee)
 
+GPG_KEYS=(
+  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-slaanesh"
+  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-docker-ce"
+  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-google-chrome"
+)
+
+REPOSITORIES=(
+  "https://negativo17.org/repos/fedora-multimedia.repo"
+  "https://download.docker.com/linux/fedora/docker-ce.repo"
+  "$BOOTSTRAP_ASSETS/google-chrome.repo"
+)
+
 PACKAGES=(
-  ffmpeg
+  docker-ce
   git
-  HandBrake-cli
+  google-chrome-stable
   htop
-  libdvdcss
-  makemkv
   mosh
   ncdu
   nmap
   p7zip
+  p7zip-plugins
   python3
   stow
   thefuck
@@ -50,20 +59,38 @@ fi
 
 
 #
-# Install packages
+# Install repositories
 #
 echo ""
-echo "__ Installing Packages __"
+echo "__ Installing Repositories __"
 
-echo -n "Adding repo: negativo17 - Multimedia... "
-sudo dnf config-manager --add-repo="$REPO_NEGATIVO" >/dev/null
+# Ensure dnf plugins are installed
+sudo dnf -yq install dnf-plugins-core >/dev/null 2>&1
+
+# Add repositories
+echo -n "Adding repositories... "
+
+addrepos=""
+for repo in "${REPOSITORIES[@]}"
+do
+  addrepos="$addrepos --add-repo=$repo"
+done
+
+sudo dnf config-manager $(echo -n "$addrepos") >/dev/null
 echo "done"
-echo ""
 
+# Cleanup
 echo -n "Cleaning up repo cache... "
 sudo dnf clean all >/dev/null
 sudo dnf makecache >/dev/null
 echo "done"
+
+
+#
+# Install packages
+#
+echo ""
+echo "__ Installing Packages __"
 
 for package in "${PACKAGES[@]}"
 do
@@ -74,3 +101,9 @@ do
     echo "failed"
   fi
 done
+
+
+#
+# Docker
+#
+docker pull ntodd/video-transcoding
