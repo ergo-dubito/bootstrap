@@ -16,12 +16,15 @@ DEV_DIR="$HOME/Development"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase"
 DICT="/usr/share/dict/words"
 
-STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
+BOOTSTRAP_REPO="https://raw.githubusercontent.com/bradleyfrank/bootstrap"
+BOOTSTRAP_URL="$BOOTSTRAP_REPO/master"
+BOOTSTRAP_ASSETS="$BOOTSTRAP_REPO/master/assets"
 
-BOOTSTRAP_URL="https://raw.githubusercontent.com/bradleyfrank/bootstrap/master"
 DOTFILES_HTTPS="https://github.com/bradleyfrank/dotfiles.git"
 DOTFILES_GIT="git@github.com:bradleyfrank/dotfiles.git"
 DOTFILES_LOC="$HOME/.dotfiles"
+
+STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
 # GitHub RSA SHA256 fingerprint
 # https://help.github.com/articles/github-s-ssh-key-fingerprints/
