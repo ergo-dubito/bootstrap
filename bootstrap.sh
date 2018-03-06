@@ -56,6 +56,18 @@ PYTHON_PACKAGES=(
 # Functions
 # ==============================================================================
 
+function add_git_hooks () {
+  local githook_postmerge
+  githook_postmerge="$DOTFILES_LOC/.git/hooks/post-merge"
+
+  whichever "wget"
+  WGET="$BIN_PATH/wget"
+
+  "$WGET" "$BOOTSTRAP_ASSETS/post-merge.git" -O "$githook_postmerge"
+  chmod u+x "$githook_postmerge"
+}
+
+
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
   "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
@@ -64,15 +76,14 @@ function clone_dotfiles_repo () {
   "$GIT" config core.fileMode false
   popd >/dev/null
   echo "done"
-
-  fix_permissions
 }
 
 
 function fix_permissions () {
   echo -n "Fixing file permissions... "
-  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
+  chmod 600 "$DOTFILES_LOC"/ssh/.ssh
   chmod 600 "$DOTFILES_LOC"/ssh/.ssh/authorized_keys
+  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
   chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
   echo "done"
 }
@@ -296,10 +307,14 @@ else
     popd >/dev/null
     rm -rf "$DOTFILES_LOC"
     clone_dotfiles_repo
+    add_git_hooks
+    fix_permissions
   else
     echo -n "Updating repo... "
     "$GIT" checkout master >/dev/null 2>&1
     if "$GIT" pull >/dev/null 2>&1; then
+      add_git_hooks
+      fix_permissions
       echo "done"
     else
       echo "failed (but no problem)"
