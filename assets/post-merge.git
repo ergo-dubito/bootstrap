@@ -1,5 +1,5 @@
 #!/bin/bash
 
-chmod 600 "$HOME"/.dotfiles/ssh/.ssh/authorized_keys
-chmod 600 "$HOME"/.dotfiles/ssh/.ssh/config
-chmod 600 "$HOME"/.dotfiles/ssh/.ssh
+chmod 600 ./ssh/.ssh
+chmod 600 ./ssh/.ssh/authorized_keys
+chmod 600 ./ssh/.ssh/config
