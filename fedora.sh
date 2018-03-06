@@ -26,11 +26,11 @@ PACKAGES=(
   ffmpeg
   git
   google-chrome-stable
-  HandBrakeCLI
+  HandBrake-cli
   htop
-  mkvpropedit
+  libmp4v2
+  mkvtoolnix
   mosh
-  mp4track
   mpv
   ncdu
   nmap
@@ -69,9 +69,6 @@ fi
 echo ""
 echo "__ Installing Repositories __"
 
-# Ensure dnf plugins are installed
-sudo dnf -yq install dnf-plugins-core >/dev/null 2>&1
-
 # Add repositories
 echo -n "Adding repositories... "
 
@@ -81,6 +78,10 @@ do
   addrepos="$addrepos --add-repo=$repo"
 done
 
+# Ensure dnf plugins are installed
+sudo dnf -yq install dnf-plugins-core >/dev/null 2>&1
+
+# Install all repos using DNF
 sudo dnf config-manager $(echo -n "$addrepos") >/dev/null
 echo "done"
 
