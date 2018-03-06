@@ -75,21 +75,28 @@ function add_git_hooks () {
 
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
+
   "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
+
   pushd "$DOTFILES_LOC" >/dev/null
   "$GIT" remote set-url origin "$DOTFILES_GIT"
   "$GIT" config core.fileMode false
   popd >/dev/null
+
+  add_git_hooks
+  fix_permissions
+
   echo "done"
 }
 
 
 function fix_permissions () {
   echo -n "Fixing file permissions... "
-  chmod 700 "$DOTFILES_LOC"/ssh/.ssh
-  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/authorized_keys
-  chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
-  chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
+  pushd "$DOTFILES_LOC" >/dev/null
+  # shellcheck disable=SC1091
+  (. ./.git/hooks/post-merge)
+  chmod uo+x ./bin/.local/bin/keychain
+  popd >/dev/null
   echo "done"
 }
 
@@ -183,6 +190,7 @@ function install_stow () {
 function source_remote_file () {
   f=$(mktemp)
   curl -o "$f" -s -L "$BOOTSTRAP_URL/$OS.sh"
+  # shellcheck source=/dev/null
   (. "$f")
 }
 
@@ -312,8 +320,6 @@ else
     popd >/dev/null
     rm -rf "$DOTFILES_LOC"
     clone_dotfiles_repo
-    add_git_hooks
-    fix_permissions
   else
     echo -n "Updating repo... "
     "$GIT" checkout master >/dev/null 2>&1
