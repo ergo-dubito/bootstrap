@@ -63,8 +63,13 @@ function add_git_hooks () {
   whichever "wget"
   WGET="$BIN_PATH/wget"
 
-  "$WGET" "$BOOTSTRAP_ASSETS/post-merge.git" -O "$githook_postmerge"
-  chmod u+x "$githook_postmerge"
+  echo -n "Downloading git hooks... "
+  if "$WGET" "$BOOTSTRAP_ASSETS/post-merge.git" -qO "$githook_postmerge"; then
+    chmod u+x "$githook_postmerge"
+    echo "done"
+  else
+    echo "failed"
+  fi
 }
 
 
@@ -81,7 +86,7 @@ function clone_dotfiles_repo () {
 
 function fix_permissions () {
   echo -n "Fixing file permissions... "
-  chmod 600 "$DOTFILES_LOC"/ssh/.ssh
+  chmod 700 "$DOTFILES_LOC"/ssh/.ssh
   chmod 600 "$DOTFILES_LOC"/ssh/.ssh/authorized_keys
   chmod 600 "$DOTFILES_LOC"/ssh/.ssh/config
   chmod uo+x "$DOTFILES_LOC"/bin/.local/bin/keychain
