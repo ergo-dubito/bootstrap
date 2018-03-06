@@ -23,10 +23,15 @@ REPOSITORIES=(
 
 PACKAGES=(
   docker-ce
+  ffmpeg
   git
   google-chrome-stable
+  HandBrakeCLI
   htop
+  mkvpropedit
   mosh
+  mp4track
+  mpv
   ncdu
   nmap
   p7zip
@@ -101,9 +106,3 @@ do
     echo "failed"
   fi
 done
-
-
-#
-# Docker
-#
-docker pull ntodd/video-transcoding
