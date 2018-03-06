@@ -1,5 +1,5 @@
 #!/bin/bash
 
-chmod 600 ./ssh/.ssh
+chmod 700 ./ssh/.ssh
 chmod 600 ./ssh/.ssh/authorized_keys
 chmod 600 ./ssh/.ssh/config
