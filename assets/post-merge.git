@@ -2,3 +2,4 @@
 
 chmod 600 "$HOME"/.dotfiles/ssh/.ssh/authorized_keys
 chmod 600 "$HOME"/.dotfiles/ssh/.ssh/config
+chmod 600 "$HOME"/.dotfiles/ssh/.ssh
