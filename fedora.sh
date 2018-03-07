@@ -73,21 +73,25 @@ fi
 echo ""
 echo "__ Installing Repositories __"
 
-# Add repositories
-echo -n "Adding repositories... "
+# Ensure dnf plugins are installed
+sudo dnf -yq install dnf-plugins-core >/dev/null
 
-addrepos=""
-for repo in "${REPOSITORIES[@]}"
+# Install GPG keys
+for gpgkey in "${GPG_KEYS[@]}"
 do
-  addrepos="$addrepos --add-repo=$repo"
+  echo -n "Importing GPG key ${gpgkey#RPM-GPG-KEY-}... "
+  sudo rpm --import "$gpgkey" >/dev/null
+  echo "done"
 done
 
-# Ensure dnf plugins are installed
-sudo dnf -yq install dnf-plugins-core >/dev/null 2>&1
-
-# Install all repos using DNF
-sudo dnf config-manager $(echo -n "$addrepos") >/dev/null
-echo "done"
+# Add repositories
+for repo in "${REPOSITORIES[@]}"
+do
+  reponame=$(basename -s .repo "$repo")
+  echo -n "Adding repository $reponame... "
+  sudo dnf config-manager --add-repo="$repo" >/dev/null
+  echo "done"
+done
 
 # Cleanup
 echo -n "Cleaning up repo cache... "
@@ -111,3 +115,7 @@ do
     echo "failed"
   fi
 done
+
+echo -n "Performing system updates... "
+sudo dnf upgrade -yq >/dev/null
+echo "done"
