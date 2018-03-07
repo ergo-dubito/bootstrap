@@ -394,7 +394,7 @@ for sshkey in "${sshkeys[@]}"; do
 done
 
 # Save or delete temporary passphrase
-if [[ $keep_passphrase -eq "$FALSE" ]]; then
+if [[ "$keep_passphrase" -eq "$FALSE" ]]; then
   rm -f "$PASSPHRASE_FILE"
   echo "Removed temporary passphrase."
 else
