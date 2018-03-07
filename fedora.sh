@@ -10,15 +10,17 @@ SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 TEE=$(which tee)
 
 GPG_KEYS=(
-  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-slaanesh"
-  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-docker-ce"
-  "$BOOTSTRAP_ASSETS/RPM-GPG-KEY-google-chrome"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-slaanesh"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-docker-ce"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-google-chrome"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-puppet5"
 )
 
 REPOSITORIES=(
-  "https://negativo17.org/repos/fedora-multimedia.repo"
-  "https://download.docker.com/linux/fedora/docker-ce.repo"
-  "$BOOTSTRAP_ASSETS/google-chrome.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/fedora-multimedia.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/docker-ce.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/google-chrome.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
 )
 
 PACKAGES=(
@@ -34,10 +36,12 @@ PACKAGES=(
   mpv
   ncdu
   nmap
+  perf
   p7zip
   p7zip-plugins
   python3
   stow
+  strace
   thefuck
   tldr
   tmux
