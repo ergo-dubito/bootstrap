@@ -64,7 +64,7 @@ function add_git_hooks () {
   WGET="$BIN_PATH/wget"
 
   echo -n "Downloading git hooks... "
-  if "$WGET" "$BOOTSTRAP_ASSETS/post-merge.git" -qO "$githook_postmerge"; then
+  if "$WGET" "$BOOTSTRAP_ASSETS/git/post-merge" -qO "$githook_postmerge"; then
     chmod u+x "$githook_postmerge"
     echo "done"
   else
@@ -445,6 +445,7 @@ if [[ "$commit" -eq "$TRUE" ]]; then
   pushd "$DOTFILES_LOC" >/dev/null
   "$GIT" add "$authkeys" >/dev/null
   "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
+  popd >/dev/null
 fi
 
 # ------------------------------------------------------------------------------
