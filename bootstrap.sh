@@ -7,6 +7,9 @@ set -o nounset
 # Variables
 # ==============================================================================
 
+TRUE=0
+FALSE=1
+
 OS=""
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
@@ -16,6 +19,7 @@ DEV_DIR="$HOME/Development"
 DICT="/usr/share/dict/words"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase"
 PASSPHRASE_WORDS=4
+PASSPHRASE_SAVE="$FALSE"
 
 BOOTSTRAP_REPO="https://raw.githubusercontent.com/bradleyfrank/bootstrap"
 BOOTSTRAP_URL="$BOOTSTRAP_REPO/master"
@@ -34,9 +38,6 @@ GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 SED=$(which sed)
 TR=$(which tr)
 SHUF=$(which shuf)
-
-TRUE=0
-FALSE=1
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH=""
@@ -136,10 +137,10 @@ function generate_sshkey () {
 
     comment="${USER}@${HOSTNAME}"
     passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
-
     ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
 
     echo "done"
+    PASSPHRASE_SAVE="$TRUE"
   fi
 }
 
@@ -382,19 +383,16 @@ known_hosts="$HOME/.ssh/known_hosts"
 ssh_create_files=("$authkeys" "$known_hosts")
 sshkeys=("rsa" "ed25519")
 
-keep_passphrase="$FALSE"
-
 # Generate a temporary secure passphrase
 generate_passphrase
 
 # Loop through keys to generate
 for sshkey in "${sshkeys[@]}"; do
   generate_sshkey "$sshkey"
-  keep_passphrase="$TRUE"
 done
 
 # Save or delete temporary passphrase
-if [[ "$keep_passphrase" -eq "$FALSE" ]]; then
+if [[ "$PASSPHRASE_SAVE" -eq "$FALSE" ]]; then
   rm -f "$PASSPHRASE_FILE"
   echo "Removed temporary passphrase."
 else
@@ -463,4 +461,5 @@ else
   cat "$HOME/.ssh/id_rsa.pub"
 fi
 echo " * Push dotfile repo updates"
+echo ""
 exit 0
