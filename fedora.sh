@@ -79,7 +79,7 @@ sudo dnf -yq install dnf-plugins-core >/dev/null
 # Install GPG keys
 for gpgkey in "${GPG_KEYS[@]}"
 do
-  echo -n "Importing GPG key ${gpgkey#RPM-GPG-KEY-}... "
+  echo -n "Importing $(basename "$gpgkey")... "
   sudo rpm --import "$gpgkey" >/dev/null
   echo "done"
 done
