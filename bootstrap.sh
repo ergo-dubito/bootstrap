@@ -8,13 +8,14 @@ set -o nounset
 # ==============================================================================
 
 OS=""
+DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
-DATE=$(date +%Y%m%d%H%M%S)
-
 DEV_DIR="$HOME/Development"
-PASSPHRASE_FILE="$HOME/.ssh/passphrase"
+
 DICT="/usr/share/dict/words"
+PASSPHRASE_FILE="$HOME/.ssh/passphrase"
+PASSPHRASE_WORDS=4
 
 BOOTSTRAP_REPO="https://raw.githubusercontent.com/bradleyfrank/bootstrap"
 BOOTSTRAP_URL="$BOOTSTRAP_REPO/master"
@@ -95,6 +96,7 @@ function fix_permissions () {
   pushd "$DOTFILES_LOC" >/dev/null
   # shellcheck disable=SC1091
   (. ./.git/hooks/post-merge)
+  chmod 750 .
   chmod uo+x ./bin/.local/bin/keychain
   popd >/dev/null
   echo "done"
@@ -117,7 +119,7 @@ function generate_passphrase () {
   fi
 
   echo -n "Generating passphrase... "
-  "$SHUF" --random-source=/dev/random -n 5 "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
+  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
   echo "done"
 }
 
