@@ -131,7 +131,7 @@ function generate_sshkey () {
 
   file="$HOME/.ssh/id_$1"
 
-  if [[ -e "$file" ]]; then
+  if [[ ! -e "$file" ]]; then
     echo -n "Generating $1 SSH key... "
 
     comment="${USER}@${HOSTNAME}"
