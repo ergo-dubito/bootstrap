@@ -386,7 +386,6 @@ ssh_create_files=("$authkeys" "$known_hosts")
 sshkeys=("rsa" "ed25519")
 
 # Generate a temporary secure passphrase
-download_dictionary
 generate_passphrase
 
 # Loop through keys to generate
