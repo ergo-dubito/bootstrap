@@ -118,7 +118,7 @@ function generate_passphrase () {
 
   if [[ ! -e "$DICT" ]]; then
     "$WGET" "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$PASSPHRASE_TMP"
-    7z x "$PASSPHRASE_TMP" -o"$HOME"/.ssh/
+    7z x "$PASSPHRASE_TMP" -o"$HOME"/.ssh/ >/dev/null 2>&1
   fi
 
   echo -n "Generating passphrase... "
