@@ -1,4 +1,4 @@
 # Bootstrap
 Bootstraps MacOS and RedHat-based distros.
 
-`curl -fsSL https://raw.githubusercontent.com/bradleyfrank/bootstrap/master/bootstrap.sh | bash`
+`curl -fsSL boot.franklybrad.com/bootstrap.sh | bash`
