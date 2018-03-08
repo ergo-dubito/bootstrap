@@ -16,8 +16,9 @@ HOSTNAME=$(hostname)
 
 DEV_DIR="$HOME/Development"
 
-DICT="/usr/share/dict/words"
-PASSPHRASE_FILE="$HOME/.ssh/passphrase"
+DICT="$HOME/.ssh/dictionary"
+PASSPHRASE_TMP="$(mktemp)"
+PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
 
@@ -115,12 +116,13 @@ function generate_passphrase () {
     chmod 700 "$HOME"/.ssh
   fi
 
-  if [[ -f "$PASSPHRASE_FILE" ]]; then
-    mv "$PASSPHRASE_FILE"{,."$DATE"}
+  if [[ ! -e "$DICT" ]]; then
+    "$WGET" "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$PASSPHRASE_TMP"
+    7z x "$PASSPHRASE_TMP" -o"$HOME"/.ssh/
   fi
 
   echo -n "Generating passphrase... "
-  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
+  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_TMP"
   echo "done"
 }
 
@@ -384,6 +386,7 @@ ssh_create_files=("$authkeys" "$known_hosts")
 sshkeys=("rsa" "ed25519")
 
 # Generate a temporary secure passphrase
+download_dictionary
 generate_passphrase
 
 # Loop through keys to generate
