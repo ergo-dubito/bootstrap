@@ -148,11 +148,12 @@ function generate_sshkey () {
 
 
 function get_operating_system () {
+  echo -n "Detecting OS... "
   if type sw_vers >/dev/null 2>&1; then
     if sw_vers | grep -iq 'mac'; then
       OS="macos"
     else
-      echo "Error: OS unable to be determined."
+      echo "failed"
       exit 1
     fi
   elif [ -f /etc/os-release ]; then
@@ -164,11 +165,11 @@ function get_operating_system () {
   elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
     OS="redhat"
   else
-    echo "Error: OS not supported."
+    echo "failed"
     exit 1
   fi
 
-  echo "Detected OS: ${OS}"
+  echo "${OS}"
 }
 
 
@@ -329,9 +330,9 @@ else
     echo -n "Updating repo... "
     "$GIT" checkout master >/dev/null 2>&1
     if "$GIT" pull >/dev/null 2>&1; then
+      echo "done"
       add_git_hooks
       fix_permissions
-      echo "done"
     else
       echo "failed (but no problem)"
     fi
@@ -396,10 +397,8 @@ done
 # Save or delete temporary passphrase
 if [[ "$PASSPHRASE_SAVE" -eq "$FALSE" ]]; then
   rm -f "$PASSPHRASE_FILE"
-  echo "Removed temporary passphrase."
 else
   chmod 400 "$PASSPHRASE_FILE"
-  echo "Saved passphrase to $PASSPHRASE_FILE."
 fi
 
 # Create required SSH files
@@ -450,18 +449,25 @@ if [[ "$commit" -eq "$TRUE" ]]; then
   popd >/dev/null
 fi
 
+
 # ------------------------------------------------------------------------------
 # Exit
 # ------------------------------------------------------------------------------
 echo ""
 echo "__ Finishing Up __"
 echo ""
+
+if [[ "$PASSPHRASE_SAVE" -eq "$TRUE" ]]; then
+  echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
+done
+
 echo -n " * Add ssh key to GitHub: "
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
   cat "$HOME/.ssh/id_ed25519.pub"
 else
   cat "$HOME/.ssh/id_rsa.pub"
 fi
+
 echo " * Push dotfile repo updates"
 echo ""
 exit 0
