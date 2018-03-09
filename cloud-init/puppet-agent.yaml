@@ -1,11 +1,11 @@
 #cloud-config
 yum_repos:
   puppet5:
-    baseurl: http://yum.puppetlabs.com/puppet5/fedora/26/$basearch
+    baseurl: http://yum.puppetlabs.com/puppet5/el/7/$basearch
     enabled: true
     gpgcheck: true
     gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppet5
-    name: Puppet 5 Repository fedora 26 - $basearch
+    name: Puppet 5 Repository el 7 - $basearch
 packages:
  - git
  - dnf-plugins-core
