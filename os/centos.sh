@@ -105,7 +105,7 @@ function _pkgs_install {
 
 function _pkgs_upgrade {
   echo -n "Performing system updates... "
-  sudo yum update -yq >/dev/null
+  sudo yum update -yq >/dev/null 2>&1
   echo "done"
 }
 

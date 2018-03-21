@@ -115,7 +115,7 @@ function _pkgs_install {
 
 function _pkgs_upgrade {
   echo -n "Performing system updates... "
-  sudo dnf upgrade -yq >/dev/null
+  sudo dnf upgrade -yq >/dev/null 2>&1
   echo "done"
 }
 
