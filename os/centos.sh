@@ -76,8 +76,8 @@ function _repos_add {
 
 function _repos_enable {
   echo -n "Enabling CentOS-specific repos... "
-  yum-config-manager --enable docker-ce-stable-centos >/dev/null 2>&1
-  yum-config-manager --enable puppet5-el >/dev/null 2>&1
+  sudo yum-config-manager --enable docker-ce-stable-centos >/dev/null 2>&1
+  sudo yum-config-manager --enable puppet5-el >/dev/null 2>&1
   echo "done"
 }
 
