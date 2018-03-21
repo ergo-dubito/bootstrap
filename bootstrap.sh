@@ -235,8 +235,6 @@ function whichever () {
 echo ""
 echo "__ Starting Bootstrap __"
 
-echo "Flag: $1"
-
 
 # ------------------------------------------------------------------------------
 # Create environment
@@ -461,7 +459,7 @@ echo ""
 
 if [[ "$PASSPHRASE_SAVE" -eq "$TRUE" ]]; then
   echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
-done
+fi
 
 echo -n " * Add ssh key to GitHub: "
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
