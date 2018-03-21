@@ -195,7 +195,7 @@ function install_stow () {
 
 function source_remote_file () {
   f=$(mktemp)
-  curl -o "$f" -s -L "$BOOTSTRAP_URL/$OS.sh"
+  curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
   # shellcheck source=/dev/null
   (. "$f")
 }
@@ -234,6 +234,8 @@ function whichever () {
 
 echo ""
 echo "__ Starting Bootstrap __"
+
+echo "Flag: $1"
 
 
 # ------------------------------------------------------------------------------
