@@ -455,17 +455,15 @@ fi
 # ------------------------------------------------------------------------------
 echo ""
 echo "__ Finishing Up __"
-echo ""
 
 if [[ "$PASSPHRASE_SAVE" -eq "$TRUE" ]]; then
   echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
 fi
 
-echo -n " * Add ssh key to GitHub: "
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
-  cat "$HOME/.ssh/id_ed25519.pub"
+  echo " * Add id_ed25519 key to GitHub"
 else
-  cat "$HOME/.ssh/id_rsa.pub"
+  echo " * Add id_rsa key to GitHub"
 fi
 
 echo " * Push dotfile repo updates"
