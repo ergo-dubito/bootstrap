@@ -83,9 +83,9 @@ function _repos_add {
 }
 
 function _repos_enable {
-  echo -n "Enabling CentOS-specific repos... "
-  sudo dnf config-manager --enable docker-ce-stable-centos >/dev/null 2>&1
-  sudo dnf config-manager --enable puppet5-el >/dev/null 2>&1
+  echo -n "Enabling Fedora-specific repos... "
+  sudo dnf config-manager --enablerepo docker-ce-stable-centos >/dev/null 2>&1
+  sudo dnf config-manager --enablerepo puppet5-el >/dev/null 2>&1
   echo "done"
 }
 
