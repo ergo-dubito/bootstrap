@@ -7,8 +7,6 @@
 SUDOERS_FILE="/etc/sudoers.d/nopasswd"
 SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
 
-TEE=$(which tee)
-
 GPG_KEYS=(
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-slaanesh"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-docker-ce"
