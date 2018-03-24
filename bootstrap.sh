@@ -11,6 +11,8 @@ TRUE=0
 FALSE=1
 
 OS=""
+CONFIG_SYSTEM="$FALSE"
+
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
@@ -59,6 +61,9 @@ PYTHON_PACKAGES=(
 # Functions
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
+# Install Git hooks into dotfile repo
+# ------------------------------------------------------------------------------
 function add_git_hooks () {
   local githook_postmerge
   githook_postmerge="$DOTFILES_LOC/.git/hooks/post-merge"
@@ -76,6 +81,9 @@ function add_git_hooks () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Clones the dotfile repo
+# ------------------------------------------------------------------------------
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
@@ -93,6 +101,9 @@ function clone_dotfiles_repo () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Executes the post-merge script and makes binaries executable
+# ------------------------------------------------------------------------------
 function fix_permissions () {
   echo -n "Fixing file permissions... "
   pushd "$DOTFILES_LOC" >/dev/null
@@ -105,6 +116,9 @@ function fix_permissions () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Generate a unique, secure passphrase using custome dictionary
+# ------------------------------------------------------------------------------
 function generate_passphrase () {
   if [[ "$OS" == "macos" ]]; then
     whichever "gshuf"
@@ -127,6 +141,9 @@ function generate_passphrase () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Create a SSH key with ssh-keygen
+# ------------------------------------------------------------------------------
 function generate_sshkey () {
   local comment
   local file
@@ -147,6 +164,9 @@ function generate_sshkey () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Run a quick and dirty check for the Operating System
+# ------------------------------------------------------------------------------
 function get_operating_system () {
   echo -n "Detecting OS... "
   if type sw_vers >/dev/null 2>&1; then
@@ -173,6 +193,9 @@ function get_operating_system () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Compile Stow from source if not installed by system
+# ------------------------------------------------------------------------------
 function install_stow () {
   echo -m "Installing Stow... "
 
@@ -186,13 +209,17 @@ function install_stow () {
   tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
   pushd "$tmp_dir" >/dev/null
   ./configure --prefix="$HOME"/.local >/dev/null
-  make && make install >/dev/null
+  make >/dev/null 2>&1
+  make install >/dev/null 2>&1
   popd >/dev/null
 
   echo "done"
 }
 
 
+# ------------------------------------------------------------------------------
+# Download and source OS-specific script as a sub-shell
+# ------------------------------------------------------------------------------
 function source_remote_file () {
   f=$(mktemp)
   curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
@@ -201,6 +228,9 @@ function source_remote_file () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Create an empty file and chmod it
+# ------------------------------------------------------------------------------
 function touch_file () {
   if [[ ! -f "$1" ]]; then
     echo -n "Creating file $1... "
@@ -215,6 +245,9 @@ function touch_file () {
 }
 
 
+# ------------------------------------------------------------------------------
+# Dirty version of `which` cause $PATH can't be trusted yet
+# ------------------------------------------------------------------------------
 function whichever () {
   BIN_PATH="NaN"
 
@@ -231,6 +264,24 @@ function whichever () {
 # ==============================================================================
 # Main
 # ==============================================================================
+
+while getopts 'hs' flag; do
+  case "${flag}" in
+    h )
+      echo "bootstrap.sh - sets up system and configures user profile"
+      echo ""
+      echo "Usage: bootstrap.sh [-hs]"
+      echo ""
+      echo "Options:"
+      echo "-h    print help menu and exit"
+      echo "-s    configure system (requires sudo access)"
+      exit 0
+      ;;
+    s ) CONFIG_SYSTEM="$TRUE" ;;
+    \?) exit 1 ;;
+  esac
+done
+
 
 echo ""
 echo "__ Starting Bootstrap __"
