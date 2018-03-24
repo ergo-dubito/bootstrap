@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
 
-
-# =========================================================================
+# ==============================================================================
 # Variables
-# -------------------------------------------------------------------------
+# ==============================================================================
 
 BREW_URL="https://raw.githubusercontent.com/Homebrew/install/master/install"
 DEFAULTS="/usr/bin/defaults write"
 
-
-# =========================================================================
-# Packages
-# -------------------------------------------------------------------------
-
 PACKAGES=(
   bash-completion2
+  bash-git-prompt
   coreutils
   git
   heroku
@@ -57,120 +52,164 @@ FONTS=(
 )
 
 
-# =========================================================================
+# ==============================================================================
 # Functions
-# -------------------------------------------------------------------------
+# ==============================================================================
 
-function get_package_status () {
-  package="$1"
-  cask="$2"
-  brew "$cask" info "$package" 2>&1 | grep -Eq '^Not installed$'
+function install_homebrew {
+  _xcode_install
+  _brew_install
 }
 
 
-function get_user_shell () {
-  dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}'
+function _xcode_install {
+  if ! type xcode-select; then
+    echo -n "Installing Xcode... "
+    if xcode-select --install; then
+      echo "done"
+    else
+      echo "failed"
+      exit 1
+    fi
+  fi
 }
 
 
-# =========================================================================
+function _brew_install {
+  if ! type brew >/dev/null 2>&1; then
+    echo -n "Installing Homebrew... "
+    if ruby -e "$(curl -fsSL ${BREW_URL})" >/dev/null 2>&1; then
+      echo "done"
+    else
+      echo "failed"
+      exit 1
+    fi
+  fi
+}
+
+
+function install_packages {
+  _brew "update" "Updating"
+  _pkgs_install
+  _cask_install
+  _brew "cleanup" "Cleanup up"
+}
+
+
+function _brew {
+  echo -n "$2 Homebrew... "
+  if brew "$1" >/dev/null 2>&1; then
+    echo "done"
+  else
+    echo "failed"
+  fi
+}
+
+
+function _pkgs_install {
+  for package in "${PACKAGES[@]}"
+  do
+    if brew info "$package" 2>&1 | grep -Eq '^Not installed$'; then
+      echo -n "Installing $package... "
+      if brew install "$package" >/dev/null 2>&1; then
+        echo "done"
+      else
+        echo "failed"
+        exit 1
+      fi
+    elif brew outdated "$package" 2>&1 | grep -q "$package"; then
+      echo -n "Upgrading $package... "
+      if brew upgrade "$package" >/dev/null 2>&1; then
+        echo "done"
+      else
+        echo "failed"
+        exit 1
+      fi
+    else
+      echo "Skipping $package... "
+    fi
+  done
+}
+
+
+function _cask_install {
+  if brew tap caskroom/cask >/dev/null 2>&1; then
+    echo "done"
+  else
+    echo "failed"
+    exit 1
+  fi
+
+  for cask in "${CASKS[@]}"
+  do
+    if brew cask info "$cask" 2>&1 | grep -Eq '^Not installed$'; then
+      echo -n "Installing cask $cask... "
+      if brew cask install "$cask" >/dev/null 2>&1; then
+        echo "done"
+      else
+        echo "failed"
+        exit 1
+      fi
+    else
+      echo "Skipping $cask... "
+    fi
+  done
+}
+
+
+function _font_install {
+  echo "Installing fonts..."
+  brew tap caskroom/fonts
+  for font in "${FONTS[@]}"
+  do
+    if get_package_status "$font" "cask"; then
+      brew cask install "$font" >/dev/null
+    fi
+  done
+}
+
+
+function upgrade_bash {
+  local user_shell
+  user_shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
+
+  if [ "$user_shell" != "/usr/local/bin/bash" ]; then
+    if [[ "$(grep -q '/usr/local/bin/bash' /etc/shells)" -ne 0 ]]; then
+      sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
+    fi
+    echo -n "Setting default shell... "
+    chsh -s /usr/local/bin/bash "$(whoami)"
+    echo "done"
+  else
+    echo "Bash is up-to-date."
+  fi
+}
+
+
+# ==============================================================================
 # Main
-# -------------------------------------------------------------------------
+# ==============================================================================
 
-#
-# Install Xcode
-#
-if [[ "$(xcode-select -v >/dev/null 2>&1)" -ne "0" ]]; then
-  echo "Installing Xcode..."
-  xcode-select --install
-fi
+echo ""
+echo "__ Installing Homebrew __"
+install_homebrew
 
 
-#
-# Install Homebrew
-#
-if [[ ! -x "$(which brew)" ]]; then
-  echo "Installing Homebrew..."
-  ruby -e "$(curl -fsSL ${BREW_URL})" >/dev/null
-fi
+echo ""
+echo "__ Installing Homebrew __"
+install_homebrew
 
 
-#
-# Update homebrew recipes
-#
-echo "Refreshing Homebrew..."
-brew update >/dev/null
+echo ""
+echo "__ Upgrading Bash __"
+upgrade_bash
 
 
-#
-# Install packages
-#
-echo "Installing packages..."
-for package in "${PACKAGES[@]}"
-do
-  if get_package_status "$package" ""; then
-    echo " - installing $package"
-    brew install "$package" >/dev/null
-  elif brew outdated "$package" | grep -q "$package"; then
-    echo " - upgrading $package"
-    brew upgrade "$package"
-  fi
-done
-
-
-#
-# Install casks
-#
-echo "Installing casks..."
-brew tap caskroom/cask
-for cask in "${CASKS[@]}"
-do
-  if get_package_status "$package" "cask"; then
-    brew cask install "$cask" >/dev/null
-  fi
-done
-
-
-#
-# Install fonts
-#
-echo "Installing fonts..."
-brew tap caskroom/fonts
-for font in "${FONTS[@]}"
-do
-  if get_package_status "$font" "cask"; then
-    brew cask install "$font" >/dev/null
-  fi
-done
-
-
-#
-# Perform cleanup
-#
-echo "Cleaning up..."
-brew cleanup
-
-
-#
-# Upgrade to Bash 4
-#
-if [ "$(get_user_shell)" != "/usr/local/bin/bash" ]; then
-  echo "Upgrading Bash..."
-  if [[ "$(grep -q '/usr/local/bin/bash' /etc/shells)" -ne 0 ]]; then
-    sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
-  fi
-  echo -n "Setting default shell... "
-  chsh -s /usr/local/bin/bash "$(whoami)"
-  get_user_shell
-fi
-
-
-#
-# MacOS system defaults
-#
-echo "Configuring system defaults..."
+echo ""
+echo "__ Configuring System __"
 
 # ==== App Settings ====
+echo -n "App settings... "
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
 "$DEFAULTS" com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -182,8 +221,11 @@ echo "Configuring system defaults..."
 defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
 defaults write com.apple.DiskUtility advanced-image-options -bool true
 
+echo "done"
+
 
 # ==== Desktop Settings ====
+echo -n "Desktop settings... "
 
 # Set to auto-hide
 "$DEFAULTS" com.apple.dock autohide -bool true
@@ -207,14 +249,20 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 "$DEFAULTS" com.apple.dock wvous-tr-corner -int 3
 "$DEFAULTS" com.apple.dock wvous-tr-modifier -int 0
 
+echo "done"
+
 
 # ==== Filesystem Settings ====
+echo -n "Filesystem settings... "
 
 # Avoid creating .DS_Store files on network volumes
 "$DEFAULTS" com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
+echo "done"
+
 
 # ==== Finder Settings ====
+echo -n "Finder settings... "
 
 # Show filename extensions by default
 "$DEFAULTS" NSGlobalDomain AppleShowAllExtensions -bool true
@@ -234,8 +282,11 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 # Default view style
 "$DEFAULTS" com.apple.finder FXPreferredViewStyle -string "clmv"
 
+echo "done"
+
 
 # ==== I/O Settings ====
+echo -n "I/O settings... "
 
 # Enable tap-to-click
 "$DEFAULTS" com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
@@ -273,8 +324,11 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 # Three finger tap to look up
 "$DEFAULTS" com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadThreeFingerTapGesture -int 2
 
+echo "done"
+
 
 # ==== Safari Settings ====
+echo -n "Safari settings... "
 
 # Enable the Debug menu
 "$DEFAULTS" com.apple.Safari IncludeInternalDebugMenu -bool true
@@ -286,8 +340,11 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 "$DEFAULTS" com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
 "$DEFAULTS" com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
 
+echo "done"
+
 
 # ==== System Settings ====
+echo -n "System settings... "
 
 # Check for software updates daily
 "$DEFAULTS" com.apple.SoftwareUpdate ScheduleFrequency -int 1
@@ -298,8 +355,11 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 # Grace period for requiring password to unlock
 "$DEFAULTS" com.apple.screensaver askForPasswordDelay -int 5
 
+echo "done"
+
 
 # ==== Terminal Settings ====
+echo -n "Terminal settings... "
 
 "$DEFAULTS" com.apple.Terminal "Default Window Settings" -string "Novel Custom"
 "$DEFAULTS" com.apple.Terminal "Startup Window Settings" -string "Novel Custom"
@@ -308,5 +368,4 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 "$DEFAULTS" com.apple.terminal ShowActiveProcessInTitle -bool false
 "$DEFAULTS" com.apple.terminal columnCount -float 100.00
 
-
-return
+echo "done"
