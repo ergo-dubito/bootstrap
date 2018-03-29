@@ -87,7 +87,9 @@ function add_git_hooks () {
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
-  "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
+  local clone
+  clone="clone --recurse-submodules"
+  "$GIT" "$clone" "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
 
   pushd "$DOTFILES_LOC" >/dev/null
   "$GIT" remote set-url origin "$DOTFILES_GIT"
@@ -110,7 +112,7 @@ function fix_permissions () {
   # shellcheck disable=SC1091
   (. ./.git/hooks/post-merge)
   chmod 750 .
-  chmod uo+x ./bin/.local/bin/keychain
+  chmod uo+x ./bin/.local/bin/*
   popd >/dev/null
   echo "done"
 }
