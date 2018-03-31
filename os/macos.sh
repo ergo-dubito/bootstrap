@@ -52,6 +52,7 @@ CASKS=(
   unrarx
   virtualbox
   vlc
+  xquartz
 )
 
 FONTS=(
@@ -251,6 +252,9 @@ defaults write com.apple.dock no-bouncing -bool true
 # Hide desktop icons
 defaults write com.apple.finder CreateDesktop -bool false
 
+# Set Dock size
+defaults write com.apple.dock tilesize -int 43
+
 # Save screenshots to ~/Downloads
 com.apple.screencapture location ~/Downloads
 
@@ -283,10 +287,6 @@ echo -n "Filesystem settings... "
 # Avoid creating .DS_Store files on network volumes
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
-# Expand save panel by default
-defaults write -g NSNavPanelExpandedStateForSaveMode -bool true
-defaults write -g NSNavPanelExpandedStateForSaveMode2 -bool true
-
 echo "done"
 
 
@@ -313,6 +313,25 @@ defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
 # Unhide user library
 chflags nohidden ~/Library
+
+# Set default location for new windows
+defaults write com.apple.finder NewWindowTarget -string "PfLo"
+defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Downloads/"
+
+# Disable creation of .DS_Store files on network volumes
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+echo "done"
+
+
+# ==== Interface Settings ====
+echo -n "Interface settings... "
+
+# Expand save panel by default
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
 
 echo "done"
 
@@ -358,8 +377,7 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadThreeF
 
 # Set very low key repeat rates
 defaults write NSGlobalDomain InitialKeyRepeat -int 25
-defaults write NSGlobalDomain KeyRepeat -int 0.02
-
+defaults write NSGlobalDomain KeyRepeat -int 1
 
 echo "done"
 
@@ -406,11 +424,14 @@ echo "done"
 # ==== Terminal Settings ====
 echo -n "Terminal settings... "
 
-defaults write com.apple.Terminal "Default Window Settings" -string "Novel Custom"
-defaults write com.apple.Terminal "Startup Window Settings" -string "Novel Custom"
-defaults write write com.apple.terminal StringEncodings -array 4
-defaults write com.apple.terminal FontAntialias -bool true
-defaults write com.apple.terminal ShowActiveProcessInTitle -bool false
-defaults write com.apple.terminal columnCount -float 100.00
+# Default profile
+defaults write com.apple.Terminal "Default Window Settings" -string "Solarized Dark"
+defaults write com.apple.Terminal "Startup Window Settings" -string "Solarized Dark"
+
+# Make new tabs open in default directory
+defaults write com.apple.Terminal NewTabWorkingDirectoryBehavior -int 1
+
+# Set default Shell to updated Bash
+defaults write com.apple.Terminal Shell -string "/usr/local/bin/bash"
 
 echo "done"
