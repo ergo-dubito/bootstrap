@@ -45,6 +45,7 @@ CASKS=(
   keepingyouawake
   keka
   macdown
+  osxfuse
   slack
   spotify
   textmate
