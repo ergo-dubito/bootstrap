@@ -30,7 +30,7 @@ BOOTSTRAP_ASSETS="$BOOTSTRAP_REPO/master/assets"
 
 DOTFILES_HTTPS="https://github.com/bradleyfrank/dotfiles.git"
 DOTFILES_GIT="git@github.com:bradleyfrank/dotfiles.git"
-DOTFILES_LOC="$HOME/.dotfiles"
+DOTFILES_DIR="$HOME/.dotfiles"
 
 STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
@@ -66,7 +66,7 @@ PYTHON_PACKAGES=(
 # ------------------------------------------------------------------------------
 function add_git_hooks () {
   local githook_postmerge
-  githook_postmerge="$DOTFILES_LOC/.git/hooks/post-merge"
+  githook_postmerge="$DOTFILES_DIR/.git/hooks/post-merge"
 
   whichever "wget"
   WGET="$BIN_PATH/wget"
@@ -89,9 +89,9 @@ function clone_dotfiles_repo () {
 
   local clone
   clone="clone --recurse-submodules"
-  "$GIT" "$clone" "$DOTFILES_HTTPS" "$DOTFILES_LOC" >/dev/null 2>&1
+  "$GIT" "$clone" "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1
 
-  pushd "$DOTFILES_LOC" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null
   "$GIT" remote set-url origin "$DOTFILES_GIT"
   "$GIT" config core.fileMode false
   popd >/dev/null
@@ -108,7 +108,7 @@ function clone_dotfiles_repo () {
 # ------------------------------------------------------------------------------
 function fix_permissions () {
   echo -n "Fixing file permissions... "
-  pushd "$DOTFILES_LOC" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null
   # shellcheck disable=SC1091
   (. ./.git/hooks/post-merge)
   chmod 750 .
@@ -295,6 +295,7 @@ echo "__ Starting Bootstrap __"
 if [[ ! -d "$DEV_DIR" ]]; then
   echo -n "Making dev environment... "
   mkdir "$DEV_DIR"
+  mkdir "$DOTFILES_DIR"
   echo "done"
 fi
 
@@ -371,13 +372,13 @@ done
 echo ""
 echo "__ Installing Dotfile Customizations __"
 
-if [[ ! -d "$DOTFILES_LOC" ]]; then
+if [[ ! -d "$DOTFILES_DIR" ]]; then
   clone_dotfiles_repo
 else
-  pushd "$DOTFILES_LOC" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null
   if ! git status >/dev/null 2>&1; then
     popd >/dev/null
-    rm -rf "$DOTFILES_LOC"
+    rm -rf "$DOTFILES_DIR"
     clone_dotfiles_repo
   else
     echo -n "Updating repo... "
@@ -397,7 +398,7 @@ fi
 # ------------------------------------------------------------------------------
 # Stow packages
 # ------------------------------------------------------------------------------
-pushd "$DOTFILES_LOC" >/dev/null
+pushd "$DOTFILES_DIR" >/dev/null
 shopt -s nullglob
 
 if git branch --list | grep -q "$HOSTNAME"; then
@@ -406,7 +407,7 @@ if git branch --list | grep -q "$HOSTNAME"; then
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
-    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" "$_pkg"
+    "$STOW" -d "$DOTFILES_DIR" -t "$HOME" "$_pkg"
     echo "done"
   done
 else
@@ -415,7 +416,7 @@ else
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
-    "$STOW" -d "$DOTFILES_LOC" -t "$HOME" --adopt "$_pkg"
+    "$STOW" -d "$DOTFILES_DIR" -t "$HOME" --adopt "$_pkg"
     echo "done"
   done
   "$GIT" add -A >/dev/null
@@ -433,7 +434,7 @@ echo ""
 echo "__ Configuring SSH __"
 
 # Set some variables
-authkeys="$DOTFILES_LOC/ssh/.ssh/authorized_keys"
+authkeys="$DOTFILES_DIR/ssh/.ssh/authorized_keys"
 known_hosts="$HOME/.ssh/known_hosts"
 
 ssh_create_files=("$authkeys" "$known_hosts")
@@ -496,7 +497,7 @@ done
 popd >/dev/null
 
 if [[ "$commit" -eq "$TRUE" ]]; then
-  pushd "$DOTFILES_LOC" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null
   "$GIT" add "$authkeys" >/dev/null
   "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
   popd >/dev/null
