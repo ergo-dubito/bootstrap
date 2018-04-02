@@ -6,6 +6,25 @@
 
 _HOSTNAME="Brads-Mac"
 
+MAS_APPS=(
+  # 1Blocker
+  1107421413
+  # OneDrive
+  823766827
+  # Deliveries
+  924726344
+  # Evernote
+  406056744
+  # Pixelmator
+  407963104
+  # Reeder 3
+  880001334
+  # TweetBot
+  557168941
+  # The Unarchiver
+  425424353
+)
+
 CASKS=(
   1password
   appcleaner
@@ -21,6 +40,7 @@ CASKS=(
   keka
   macdown
   osxfuse
+  sip
   slack
   spotify
   textmate
@@ -69,6 +89,15 @@ done
 
 
 #
+# Install Mac App Store apps
+#
+for app in "${MAS_APPS[@]}"
+do
+  mas install "$app"
+done
+
+
+#
 # Require admin to make System Preference changes
 #
 echo "Securing System Preferences... "
@@ -95,8 +124,8 @@ fi
 echo "Setting hostname to ${_HOSTNAME}... "
 
 sudo scutil --set HostName "${_HOSTNAME}.local"
-sudo scutil --set LocalHostName ${_HOSTNAME}
-sudo scutil --set ComputerName ${_HOSTNAME}
+sudo scutil --set LocalHostName "${_HOSTNAME}"
+sudo scutil --set ComputerName "${_HOSTNAME}"
 sudo dscacheutil -flushcache
 
 
