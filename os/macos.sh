@@ -74,9 +74,9 @@ function install_homebrew {
 
 
 function _xcode_install {
-  if ! type xcode-select; then
+  if ! type xcode-select >/dev/null 2>&1; then
     echo -n "Installing Xcode... "
-    if xcode-select --install; then
+    if xcode-select --install >/dev/null 2>&1; then
       echo "done"
     else
       echo "failed"
@@ -205,8 +205,8 @@ install_homebrew
 
 
 echo ""
-echo "__ Installing Homebrew __"
-install_homebrew
+echo "__ Installing Packages __"
+install_packages
 
 
 echo ""
