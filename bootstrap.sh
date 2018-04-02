@@ -516,6 +516,10 @@ else
 fi
 
 echo " * Push dotfile repo updates"
-echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash"
+
+if [[ "$OS" == "macos" ]]; then
+  echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash"
+fi
+
 echo ""
 exit 0
