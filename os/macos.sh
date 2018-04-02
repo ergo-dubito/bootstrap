@@ -13,6 +13,7 @@ PACKAGES=(
   git
   heroku
   markdown
+  mas
   mosh
   ncdu
   nmap
