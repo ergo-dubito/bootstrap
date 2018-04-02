@@ -185,10 +185,8 @@ function upgrade_bash {
   user_shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
 
   if [ "$user_shell" != "/usr/local/bin/bash" ]; then
-    if [[ "$(grep -q '/usr/local/bin/bash' /etc/shells)" -ne 0 ]]; then
-      sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
-    fi
     echo -n "Setting default shell... "
+    # Also see plugins/macos.sh for /etc/shells edit.
     chsh -s /usr/local/bin/bash "$(whoami)"
     echo "done"
   else
@@ -257,10 +255,10 @@ defaults write com.apple.finder CreateDesktop -bool false
 defaults write com.apple.dock tilesize -int 43
 
 # Save screenshots to ~/Downloads
-com.apple.screencapture location ~/Downloads
+defaults write com.apple.screencapture location ~/Downloads
 
 # Save screenshots as PNG
-com.apple.screencapture type -string "png"
+defaults write com.apple.screencapture type -string "png"
 
 # Hot corner (bottom-left): show desktop
 defaults write com.apple.dock wvous-bl-corner -int 4
@@ -343,7 +341,7 @@ echo -n "I/O settings... "
 # Enable tap-to-click
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 defaults write com.apple.AppleMultitouchtrackpad Clicking -bool true
-defaults write -currentHost NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
 # Two finger tap to right-click
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRightClick -bool true
@@ -361,14 +359,12 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRotate
 defaults write NSGlobalDomain AppleEnableSwipeNavigateWithScrolls -bool true
 
 # Three finger horizontal swipe between pages
-defaults write -currentHost NSGlobalDomain com.apple.trackpad.threeFingerHorizSwipeGesture -int 1
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadThreeFingerHorizSwipeGesture -int 1
-defaults write com.apple.AppleMultitouchtrackpad                  trackpadThreeFingerHorizSwipeGesture -int 1
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 1
+defaults write com.apple.AppleMultitouchtrackpad TrackpadThreeFingerHorizSwipeGesture -int 1
 
 # Show Notification Center with two finger swipe from fight edge
-defaults write -currentHost NSGlobalDomain com.apple.trackpad.twoFingerFromRightEdgeSwipeGesture -int 3
-defaults write com.apple.AppleMultitouchtrackpad                  trackpadTwoFingerFromRightEdgeSwipeGesture -int 3
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+defaults write com.apple.AppleMultitouchtrackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
 
 # Smart zoom
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadTwoFingerDoubleTapGesture -int 1
@@ -416,8 +412,8 @@ defaults write com.apple.screensaver askForPasswordDelay -int 5
 
 # Require admin to make System Preference changes
 sysprefs=$(mktemp)
-security authorizationdb read system.preferences > "$sysprefs" /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
-security authorizationdb write system.preferences < "$sysprefs"
+security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
+security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
 
 echo "done"
 
