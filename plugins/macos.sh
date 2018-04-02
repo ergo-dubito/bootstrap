@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 
-# Run this script as root
+# Ensure the script is run as root
+if [[ "$USER" != "root" ]]; then
+  echo "Must be run with sudo/root."
+  exit 1
+fi
+
+# Add Bash 4 to global shell conf
+if ! grep -q '/usr/local/bin/bash' /etc/shells; then
+  bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
+fi
 
 # Set hostname
+
 scutil --set HostName Brads-Mac.local
 scutil --set LocalHostName Brads-Mac
 scutil --set ComputerName Brads-Mac
@@ -17,7 +27,11 @@ pmset displaysleep 30
 systemsetup -setcomputersleep Never
 
 # Enable firewall
-/usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate | grep -q "disabled"; then
+  /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+fi
 
 # Enable FileVault
-fdesetup enable
+if ! fdesetup isactive; then
+  fdesetup enable
+fi
