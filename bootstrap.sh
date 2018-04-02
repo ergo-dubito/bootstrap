@@ -11,7 +11,7 @@ TRUE=0
 FALSE=1
 
 OS=""
-CONFIG_SYSTEM="$FALSE"
+USER_MODE="$FALSE"
 
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
@@ -91,10 +91,10 @@ function clone_dotfiles_repo () {
   clone="clone --recurse-submodules"
   "$GIT" "$clone" "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1
 
-  pushd "$DOTFILES_DIR" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null 2>&1
   "$GIT" remote set-url origin "$DOTFILES_GIT"
   "$GIT" config core.fileMode false
-  popd >/dev/null
+  popd >/dev/null 2>&1
 
   add_git_hooks
   fix_permissions
@@ -108,12 +108,12 @@ function clone_dotfiles_repo () {
 # ------------------------------------------------------------------------------
 function fix_permissions () {
   echo -n "Fixing file permissions... "
-  pushd "$DOTFILES_DIR" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null 2>&1
   # shellcheck disable=SC1091
   (. ./.git/hooks/post-merge)
   chmod 750 .
   chmod uo+x ./bin/.local/bin/*
-  popd >/dev/null
+  popd >/dev/null 2>&1
   echo "done"
 }
 
@@ -209,11 +209,11 @@ function install_stow () {
 
   curl -L "$STOW_URL" > "$tmp_fle" 2>/dev/null
   tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
-  pushd "$tmp_dir" >/dev/null
-  ./configure --prefix="$HOME"/.local >/dev/null
+  pushd "$tmp_dir" >/dev/null 2>&1
+  ./configure --prefix="$HOME"/.local >/dev/null 2>&1
   make >/dev/null 2>&1
   make install >/dev/null 2>&1
-  popd >/dev/null
+  popd >/dev/null 2>&1
 
   echo "done"
 }
@@ -267,7 +267,7 @@ function whichever () {
 # Main
 # ==============================================================================
 
-while getopts 'hs' flag; do
+while getopts 'hu' flag; do
   case "${flag}" in
     h )
       echo "bootstrap.sh - sets up system and configures user profile"
@@ -276,10 +276,10 @@ while getopts 'hs' flag; do
       echo ""
       echo "Options:"
       echo "-h    print help menu and exit"
-      echo "-s    configure system (requires sudo access)"
+      echo "-u    user mode (skips configs that require root privileges)"
       exit 0
       ;;
-    s ) CONFIG_SYSTEM="$TRUE" ;;
+    u ) USER_MODE="$TRUE" ;;
     \?) exit 1 ;;
   esac
 done
@@ -290,14 +290,9 @@ echo "__ Starting Bootstrap __"
 
 
 # ------------------------------------------------------------------------------
-# Create environment
+# Misc items
 # ------------------------------------------------------------------------------
-if [[ ! -d "$DEV_DIR" ]]; then
-  echo -n "Making dev environment... "
-  mkdir "$DEV_DIR"
-  mkdir "$DOTFILES_DIR"
-  echo "done"
-fi
+if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
 
 
 # ------------------------------------------------------------------------------
@@ -372,36 +367,37 @@ done
 echo ""
 echo "__ Installing Dotfile Customizations __"
 
-if [[ ! -d "$DOTFILES_DIR" ]]; then
+# Create dotfiles directory
+if [[ ! -d "$DOTFILES_DIR" ]]; then mkdir "$DOTFILES_DIR"; fi
+pushd "$DOTFILES_DIR" >/dev/null 2>&1
+
+if ! git status >/dev/null 2>&1; then
+  popd >/dev/null 2>&1
   clone_dotfiles_repo
 else
-  pushd "$DOTFILES_DIR" >/dev/null
-  if ! git status >/dev/null 2>&1; then
-    popd >/dev/null
-    rm -rf "$DOTFILES_DIR"
-    clone_dotfiles_repo
-  else
-    echo -n "Updating repo... "
-    "$GIT" checkout master >/dev/null 2>&1
+  echo -n "Updating repo... "
+  if "$GIT" checkout master >/dev/null 2>&1; then
     if "$GIT" pull >/dev/null 2>&1; then
-      echo "done"
       add_git_hooks
       fix_permissions
+      echo "done"
     else
       echo "failed (but no problem)"
     fi
-    popd >/dev/null
+  else
+    echo "failed (but no problem)"
   fi
+  popd >/dev/null 2>&1
 fi
 
 
 # ------------------------------------------------------------------------------
 # Stow packages
 # ------------------------------------------------------------------------------
-pushd "$DOTFILES_DIR" >/dev/null
+pushd "$DOTFILES_DIR" >/dev/null 2>&1
 shopt -s nullglob
 
-if git branch --list | grep -q "$HOSTNAME"; then
+if git branch --list | grep -q "$HOSTNAME" >/dev/null 2>&1; then
   "$GIT" checkout master >/dev/null 2>&1
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
@@ -411,7 +407,7 @@ if git branch --list | grep -q "$HOSTNAME"; then
     echo "done"
   done
 else
-  "$GIT" checkout -b "$HOSTNAME"
+  "$GIT" checkout -b "$HOSTNAME" >/dev/null 2>&1
   stow_packages=(*/)
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
@@ -419,12 +415,12 @@ else
     "$STOW" -d "$DOTFILES_DIR" -t "$HOME" --adopt "$_pkg"
     echo "done"
   done
-  "$GIT" add -A >/dev/null
-  "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null
-  "$GIT" checkout master >/dev/null
+  "$GIT" add -A >/dev/null 2>&1
+  "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null 2>&1
+  "$GIT" checkout master >/dev/null 2>&1
 fi
 
-popd >/dev/null
+popd >/dev/null 2>&1
 
 
 # ------------------------------------------------------------------------------
@@ -477,7 +473,7 @@ else
 fi
 
 # Add public keys to authorized_keys
-pushd "$HOME"/.ssh >/dev/null
+pushd "$HOME"/.ssh >/dev/null 2>&1
 
 commit="$FALSE"
 shopt -s nullglob
@@ -494,13 +490,13 @@ for key in "${keys[@]}"; do
   fi
 done
 
-popd >/dev/null
+popd >/dev/null 2>&1
 
 if [[ "$commit" -eq "$TRUE" ]]; then
-  pushd "$DOTFILES_DIR" >/dev/null
-  "$GIT" add "$authkeys" >/dev/null
+  pushd "$DOTFILES_DIR" >/dev/null 2>&1
+  "$GIT" add "$authkeys" >/dev/null 2>&1
   "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
-  popd >/dev/null
+  popd >/dev/null 2>&1
 fi
 
 
