@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
 set -o nounset
 
 # ==============================================================================
@@ -87,9 +86,7 @@ function add_git_hooks () {
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
-  local clone
-  clone="clone --recurse-submodules"
-  "$GIT" "$clone" "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1
+  "$GIT" clone --recurse-submodules "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1
 
   pushd "$DOTFILES_DIR" >/dev/null 2>&1
   "$GIT" remote set-url origin "$DOTFILES_GIT"
@@ -367,7 +364,7 @@ done
 echo ""
 echo "__ Installing Dotfile Customizations __"
 
-pushd "$HOME"
+pushd "$HOME" >/dev/null 2>&1
 if [[ ! -d "$DOTFILES_DIR" ]]; then mkdir "$DOTFILES_DIR"; fi
 pushd "$DOTFILES_DIR" >/dev/null 2>&1
 
