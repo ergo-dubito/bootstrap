@@ -116,7 +116,7 @@ function fix_permissions () {
 
 
 # ------------------------------------------------------------------------------
-# Generate a unique, secure passphrase using custome dictionary
+# Generate a unique, secure passphrase using custom dictionary
 # ------------------------------------------------------------------------------
 function generate_passphrase () {
   if [[ "$OS" == "macos" ]]; then
@@ -379,10 +379,10 @@ else
       fix_permissions
       echo "done"
     else
-      echo "failed (but no problem)"
+      echo "failed"
     fi
   else
-    echo "failed (but no problem)"
+    echo "failed"
   fi
   popd >/dev/null 2>&1
 fi
@@ -516,5 +516,6 @@ else
 fi
 
 echo " * Push dotfile repo updates"
+echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash"
 echo ""
 exit 0

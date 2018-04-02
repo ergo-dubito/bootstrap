@@ -31,31 +31,6 @@ PACKAGES=(
   xz
 )
 
-CASKS=(
-  1password
-  appcleaner
-  bartender
-  cyberduck
-  docker
-  fantastical
-  firefox
-  google-chrome
-  imazing-mini
-  istat-menus
-  keepingyouawake
-  keka
-  macdown
-  osxfuse
-  slack
-  spotify
-  textmate
-  transmit
-  unrarx
-  virtualbox
-  vlc
-  xquartz
-)
-
 FONTS=(
   font-clear-sans
   font-inconsolidata
@@ -105,7 +80,6 @@ function install_packages {
   _brew "update" "Updating Homebrew"
   _pkgs_install
   _font_install
-  _cask_install
   _brew "cleanup" "Cleaning up Homebrew"
 }
 
@@ -139,25 +113,6 @@ function _pkgs_install {
       fi
     else
       echo "Skipping $package... "
-    fi
-  done
-}
-
-
-function _cask_install {
-  _brew "tap caskroom/cask" "Ensuring apps cask is tapped"
-
-  for cask in "${CASKS[@]}"
-  do
-    if brew cask info "$cask" 2>&1 | grep -Eq '^Not installed$'; then
-      echo -n "Installing cask $cask... "
-      if brew cask install "$cask" >/dev/null 2>&1; then
-        echo "done"
-      else
-        echo "failed"
-      fi
-    else
-      echo "Skipping $cask... "
     fi
   done
 }
