@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=SC2164
 set -o nounset
 
 # ==============================================================================
@@ -86,17 +87,19 @@ function add_git_hooks () {
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
-  "$GIT" clone --recurse-submodules "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1
+  if "$GIT" clone --recurse-submodules "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1; then
+    pushd "$DOTFILES_DIR" >/dev/null 2>&1
+    "$GIT" remote set-url origin "$DOTFILES_GIT"
+    "$GIT" config core.fileMode false
+    popd >/dev/null 2>&1
+    echo "done"
 
-  pushd "$DOTFILES_DIR" >/dev/null 2>&1
-  "$GIT" remote set-url origin "$DOTFILES_GIT"
-  "$GIT" config core.fileMode false
-  popd >/dev/null 2>&1
-
-  add_git_hooks
-  fix_permissions
-
-  echo "done"
+    add_git_hooks
+    fix_permissions
+  else
+    echo "failed"
+    exit 1
+  fi
 }
 
 
