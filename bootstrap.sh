@@ -367,7 +367,7 @@ done
 echo ""
 echo "__ Installing Dotfile Customizations __"
 
-# Create dotfiles directory
+pushd "$HOME"
 if [[ ! -d "$DOTFILES_DIR" ]]; then mkdir "$DOTFILES_DIR"; fi
 pushd "$DOTFILES_DIR" >/dev/null 2>&1
 
@@ -389,6 +389,8 @@ else
   fi
   popd >/dev/null 2>&1
 fi
+
+popd >/dev/null 2>&1
 
 
 # ------------------------------------------------------------------------------
