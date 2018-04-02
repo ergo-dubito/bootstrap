@@ -57,9 +57,11 @@ CASKS=(
 )
 
 FONTS=(
+  font-clear-sans
   font-inconsolidata
   font-roboto
-  font-clear-sans
+  font-source-code-pro
+  font-source-code-pro-for-powerline
 )
 
 
@@ -100,15 +102,16 @@ function _brew_install {
 
 
 function install_packages {
-  _brew "update" "Updating"
+  _brew "update" "Updating Homebrew"
   _pkgs_install
+  _font_install
   _cask_install
-  _brew "cleanup" "Cleanup up"
+  _brew "cleanup" "Cleaning up Homebrew"
 }
 
 
 function _brew {
-  echo -n "$2 Homebrew... "
+  echo -n "$2... "
   if brew "$1" >/dev/null 2>&1; then
     echo "done"
   else
@@ -126,7 +129,6 @@ function _pkgs_install {
         echo "done"
       else
         echo "failed"
-        exit 1
       fi
     elif brew outdated "$package" 2>&1 | grep -q "$package"; then
       echo -n "Upgrading $package... "
@@ -134,7 +136,6 @@ function _pkgs_install {
         echo "done"
       else
         echo "failed"
-        exit 1
       fi
     else
       echo "Skipping $package... "
@@ -144,12 +145,7 @@ function _pkgs_install {
 
 
 function _cask_install {
-  if brew tap caskroom/cask >/dev/null 2>&1; then
-    echo "done"
-  else
-    echo "failed"
-    exit 1
-  fi
+  _brew "tap caskroom/cask" "Ensuring apps cask is tapped"
 
   for cask in "${CASKS[@]}"
   do
@@ -159,7 +155,6 @@ function _cask_install {
         echo "done"
       else
         echo "failed"
-        exit 1
       fi
     else
       echo "Skipping $cask... "
@@ -169,12 +164,17 @@ function _cask_install {
 
 
 function _font_install {
-  echo "Installing fonts..."
-  brew tap caskroom/fonts
+  _brew "tap caskroom/fonts" "Ensuring fonts cask is tapped"
+
   for font in "${FONTS[@]}"
   do
-    if get_package_status "$font" "cask"; then
-      brew cask install "$font" >/dev/null
+    if brew cask info "$font" 2>&1 | grep -Eq '^Not installed$'; then
+      echo -n "Installing font $font... "
+      if brew cask install "$font" >/dev/null 2>&1; then
+        echo "done"
+      else
+        echo "failed"
+      fi
     fi
   done
 }
@@ -412,7 +412,8 @@ defaults write com.apple.screensaver askForPasswordDelay -int 5
 
 # Require admin to make System Preference changes
 sysprefs=$(mktemp)
-security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
+security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
+/usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
 security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
 
 echo "done"
