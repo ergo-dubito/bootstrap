@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2164
-set -o nounset
+set -eu
 
 # ==============================================================================
 # Variables
@@ -38,12 +38,8 @@ STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 # https://help.github.com/articles/github-s-ssh-key-fingerprints/
 GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 
-SED=$(which sed)
-TR=$(which tr)
-SHUF=$(which shuf)
-
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
-BIN_PATH=""
+BIN_PATH="NaN"
 
 
 # ==============================================================================
@@ -122,11 +118,6 @@ function fix_permissions () {
 # Generate a unique, secure passphrase using custom dictionary
 # ------------------------------------------------------------------------------
 function generate_passphrase () {
-  if [[ "$OS" == "macos" ]]; then
-    whichever "gshuf"
-    SHUF="$BIN_PATH/gshuf"
-  fi
-
   if [[ ! -d "$HOME"/.ssh ]]; then
     mkdir "$HOME"/.ssh
     chmod 700 "$HOME"/.ssh
@@ -138,7 +129,7 @@ function generate_passphrase () {
   fi
 
   echo -n "Generating passphrase... "
-  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | "$TR" A-Z a-z | "$SED" -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_TMP"
+  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | tr A-Z a-z | sed -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_TMP"
   echo "done"
 }
 
@@ -157,7 +148,7 @@ function generate_sshkey () {
     echo -n "Generating $1 SSH key... "
 
     comment="${USER}@${HOSTNAME}"
-    passphrase=$(<"$PASSPHRASE_FILE" "$TR" -d '\n')
+    passphrase=$(<"$PASSPHRASE_FILE" tr -d '\n')
     ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
 
     echo "done"
@@ -179,9 +170,9 @@ function get_operating_system () {
       exit 1
     fi
   elif [ -f /etc/os-release ]; then
-    OS=$("$SED" -n -e 's/^ID=//p' /etc/os-release)
+    OS=$(sed -n -e 's/^ID=//p' /etc/os-release)
   elif type lsb_release >/dev/null 2>&1; then
-    OS=$(lsb_release -si | "$TR" '[:upper:]' '[:lower:]')
+    OS=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
   elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
@@ -308,6 +299,9 @@ source_remote_file
 echo ""
 echo "__ Finding Executable Paths __"
 
+#
+# pip
+#
 whichever "pip3"
 if [[ "$BIN_PATH" != "NaN" ]]; then
   PIP="$BIN_PATH/pip3"
@@ -321,8 +315,9 @@ else
   fi
 fi
 
-echo "Found \`pip\` at $PIP"
-
+#
+# git
+#
 whichever "git"
 if [[ "$BIN_PATH" != "NaN" ]]; then
   GIT="$BIN_PATH/git"
@@ -331,8 +326,9 @@ else
   exit 1
 fi
 
-echo "Found \`git\` at $GIT"
-
+#
+# stow
+#
 whichever "stow"
 if [[ "$BIN_PATH" != "NaN" ]]; then
   STOW="$BIN_PATH/stow"
@@ -341,7 +337,21 @@ else
   exit 1
 fi
 
-echo "Found \`stow\` at $STOW"
+#
+# shuf
+#
+whichever "shuf"
+if [[ "$BIN_PATH" != "NaN" ]]; then
+  SHUF="$BIN_PATH/shuf"
+else
+  whichever "gshuf"
+  if [[ "$BIN_PATH" != "NaN" ]]; then
+    SHUF="$BIN_PATH/gshuf"
+  else
+    echo "Error: \`stow\` not found."
+    exit 1
+  fi
+fi
 
 
 # ------------------------------------------------------------------------------
@@ -482,7 +492,7 @@ shopt -s nullglob
 keys=(*.pub)
 
 for key in "${keys[@]}"; do
-  publickey=$(<"$HOME"/.ssh/"$key" "$TR" -d '\n')
+  publickey=$(<"$HOME"/.ssh/"$key" tr -d '\n')
 
   if ! grep -rq "$publickey" "$authkeys"; then
     echo -n "Adding $key... "
