@@ -19,8 +19,8 @@ MAS_APPS=(
   407963104
   # Reeder 3
   880001334
-  # TweetBot
-  557168941
+  # Twitterific
+  1289378661
   # The Unarchiver
   425424353
 )
@@ -29,10 +29,11 @@ CASKS=(
   1password
   appcleaner
   bartender
-  cyberduck
+  coda
   docker
   fantastical
   firefox
+  google-backup-and-sync
   google-chrome
   imazing-mini
   istat-menus
@@ -40,11 +41,13 @@ CASKS=(
   keka
   macdown
   osxfuse
+  plexamp
   sip
   slack
   spotify
   textmate
   transmit
+  tripmode
   unrarx
   virtualbox
   vlc
