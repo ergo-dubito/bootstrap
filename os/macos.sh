@@ -21,6 +21,7 @@ PACKAGES=(
   python3
   rename
   ruby
+  shfmt
   ssh-copy-id
   stow
   thefuck

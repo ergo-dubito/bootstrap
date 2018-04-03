@@ -27,6 +27,7 @@ MAS_APPS=(
 
 CASKS=(
   1password
+  anaconda
   appcleaner
   bartender
   coda
@@ -40,6 +41,7 @@ CASKS=(
   keepingyouawake
   keka
   macdown
+  musicbrainz-picard
   osxfuse
   plexamp
   sip
