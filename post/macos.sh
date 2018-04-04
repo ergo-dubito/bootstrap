@@ -34,6 +34,7 @@ CASKS=(
   docker
   fantastical
   firefox
+  gmvault
   google-backup-and-sync
   google-chrome
   imazing-mini
