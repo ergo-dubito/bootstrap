@@ -41,6 +41,12 @@ GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH="NaN"
 
+if [[ "$OS" == "macos" ]]; then
+  SHUF="gshuf"
+else
+  SHUF="shuf"
+fi
+
 
 # ==============================================================================
 # Packages
@@ -302,55 +308,57 @@ echo "__ Finding Executable Paths __"
 #
 # pip
 #
-whichever "pip3"
+echo -n "Looking for pip... "
+whichever "pip"
+
 if [[ "$BIN_PATH" != "NaN" ]]; then
-  PIP="$BIN_PATH/pip3"
+  PIP="$BIN_PATH/pip"
+  echo "found"
 else
-  whichever "pip"
-  if "$BIN_PATH" != "NaN"; then
-    PIP="$BIN_PATH/pip"
-  else
-    echo "Error: \`pip\` not found."
-    exit 1
-  fi
+  echo "failed"
+  exit 1
 fi
 
 #
 # git
 #
+echo -n "Looking for git... "
 whichever "git"
+
 if [[ "$BIN_PATH" != "NaN" ]]; then
   GIT="$BIN_PATH/git"
+  echo "found"
 else
-  echo "Error: \`git\` not found."
+  echo "failed"
   exit 1
 fi
 
 #
 # stow
 #
+echo -n "Looking for stow... "
 whichever "stow"
+
 if [[ "$BIN_PATH" != "NaN" ]]; then
   STOW="$BIN_PATH/stow"
+  echo "found"
 else
-  echo "Error: \`stow\` not found."
+  echo "failed"
   exit 1
 fi
 
 #
 # shuf
 #
-whichever "shuf"
+echo -n "Looking for $SHUF... "
+whichever "$SHUF"
+
 if [[ "$BIN_PATH" != "NaN" ]]; then
-  SHUF="$BIN_PATH/shuf"
+  SHUF="$BIN_PATH/$SHUF"
+  echo "found"
 else
-  whichever "gshuf"
-  if [[ "$BIN_PATH" != "NaN" ]]; then
-    SHUF="$BIN_PATH/gshuf"
-  else
-    echo "Error: \`stow\` not found."
-    exit 1
-  fi
+  echo "failed"
+  exit 1
 fi
 
 
