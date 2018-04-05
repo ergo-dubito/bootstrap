@@ -16,7 +16,12 @@ USER_MODE="$FALSE"
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
-DEV_DIR="$HOME/Development"
+DIRECTORIES=(
+  "$HOME/Development"
+  "$HOME/.ssh"
+  "$HOME/.local"
+  "$HOME/.config"
+)
 
 DICT="$HOME/.ssh/dictionary"
 PASSPHRASE_TMP="$(mktemp)"
@@ -40,12 +45,6 @@ GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH="NaN"
-
-if [[ "$OS" == "macos" ]]; then
-  SHUF="gshuf"
-else
-  SHUF="shuf"
-fi
 
 
 # ==============================================================================
@@ -110,12 +109,16 @@ function clone_dotfiles_repo () {
 # ------------------------------------------------------------------------------
 function fix_permissions () {
   echo -n "Fixing file permissions... "
+
+  chmod 700 "$HOME/.ssh"
+
   pushd "$DOTFILES_DIR" >/dev/null 2>&1
   # shellcheck disable=SC1091
   (. ./.git/hooks/post-merge)
   chmod 750 .
   chmod uo+x ./bin/.local/bin/*
   popd >/dev/null 2>&1
+
   echo "done"
 }
 
@@ -135,7 +138,7 @@ function generate_passphrase () {
   fi
 
   echo -n "Generating passphrase... "
-  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | tr A-Z a-z | sed -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_TMP"
+  "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | tr A-Z a-z | sed -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
   echo "done"
 }
 
@@ -217,6 +220,20 @@ function install_stow () {
 
 
 # ------------------------------------------------------------------------------
+# Set OS dependant variables
+# ------------------------------------------------------------------------------
+function set_variables () {
+  if [[ "$OS" == "macos" ]]; then
+    PIP="pip3"
+    SHUF="gshuf"
+  else
+    PIP="pip"
+    SHUF="shuf"
+  fi
+}
+
+
+# ------------------------------------------------------------------------------
 # Download and source OS-specific script as a sub-shell
 # ------------------------------------------------------------------------------
 function source_remote_file () {
@@ -289,7 +306,10 @@ echo "__ Starting Bootstrap __"
 # ------------------------------------------------------------------------------
 # Misc items
 # ------------------------------------------------------------------------------
-if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
+for directory in "${DIRECTORIES[@]}"
+do
+  if [[ ! -d "$directory" ]]; then mkdir "$directory"; fi
+done
 
 
 # ------------------------------------------------------------------------------
@@ -297,6 +317,7 @@ if [[ ! -d "$DEV_DIR" ]]; then mkdir "$DEV_DIR"; fi
 # ------------------------------------------------------------------------------
 get_operating_system
 source_remote_file
+set_variables
 
 
 # ------------------------------------------------------------------------------
@@ -308,11 +329,11 @@ echo "__ Finding Executable Paths __"
 #
 # pip
 #
-echo -n "Looking for pip... "
-whichever "pip"
+echo -n "Looking for $PIP... "
+whichever "$PIP"
 
 if [[ "$BIN_PATH" != "NaN" ]]; then
-  PIP="$BIN_PATH/pip"
+  PIP="$BIN_PATH/$PIP"
   echo "found"
 else
   echo "failed"
