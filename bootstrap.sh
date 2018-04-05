@@ -16,15 +16,10 @@ USER_MODE="$FALSE"
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
-DIRECTORIES=(
-  "$HOME/Development"
-  "$HOME/.ssh"
-  "$HOME/.local"
-  "$HOME/.config"
-)
+DICT_TMP="$(mktemp)"
+DICT_DIR="/usr/local/share/dict"
+DICT="$DICT_DIR/words"
 
-DICT="$HOME/.ssh/dictionary"
-PASSPHRASE_TMP="$(mktemp)"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
@@ -45,6 +40,14 @@ GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH="NaN"
+
+DIRECTORIES=(
+  "$HOME/Development"
+  "$HOME/.ssh"
+  "$HOME/.local"
+  "$HOME/.config"
+  "$DICT_DIR"
+)
 
 
 # ==============================================================================
@@ -128,11 +131,7 @@ function generate_passphrase () {
     mkdir "$HOME"/.ssh
     chmod 700 "$HOME"/.ssh
   fi
-
-  if [[ ! -e "$DICT" ]]; then
-    wget "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$PASSPHRASE_TMP"
-    7z x "$PASSPHRASE_TMP" -o"$HOME"/.ssh/ >/dev/null 2>&1
-  fi
+  
 
   echo -n "Generating passphrase... "
   "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | tr A-Z a-z | sed -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
@@ -193,10 +192,33 @@ function get_operating_system () {
 
 
 # ------------------------------------------------------------------------------
+# Installs a custom dictionary
+# ------------------------------------------------------------------------------
+function install_dict () {
+  echo -n "Installing custom dictionary... "
+
+  if [[ ! -e "$DICT" ]]; then
+    if ! wget "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$DICT_TMP"; then
+      echo "failed"
+      exit 1
+    fi
+
+    if ! 7z x "$DICT_TMP" -o"$DICT_DIR/" >/dev/null 2>&1; then
+      echo "failed"
+      exit 1
+    else
+      mv "$DICT_DIR/dictionary" "$DICT"
+      echo "done"
+    fi
+  fi
+}
+
+
+# ------------------------------------------------------------------------------
 # Compile Stow from source if not installed by system
 # ------------------------------------------------------------------------------
 function install_stow () {
-  echo -m "Installing Stow... "
+  echo -n "Installing Stow... "
 
   local tmp_fle
   local tmp_dir
@@ -475,6 +497,7 @@ ssh_create_files=("$authkeys" "$known_hosts")
 sshkeys=("rsa" "ed25519")
 
 # Generate a temporary secure passphrase
+install_dict
 generate_passphrase
 
 # Loop through keys to generate
