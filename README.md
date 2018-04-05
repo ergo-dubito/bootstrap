@@ -6,6 +6,9 @@ Bootstraps MacOS and RedHat-based distros.
 ### Linux
 `sudo bash -c "echo '%wheel  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
 
+### MacOS
+`sudo bash -c "echo '%admin  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
+
 ## Bootstrap
 
 `curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash`
