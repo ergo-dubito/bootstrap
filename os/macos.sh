@@ -121,7 +121,7 @@ function _pkgs_install {
 
 
 function _font_install {
-  _brew "tap caskroom/fonts" "Ensuring fonts cask is tapped"
+  brew tap caskroom/fonts
 
   for font in "${FONTS[@]}"
   do
@@ -137,21 +137,6 @@ function _font_install {
 }
 
 
-function upgrade_bash {
-  local user_shell
-  user_shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
-
-  if [ "$user_shell" != "/usr/local/bin/bash" ]; then
-    echo -n "Setting default shell... "
-    # Also see plugins/macos.sh for /etc/shells edit.
-    chsh -s /usr/local/bin/bash "$(whoami)"
-    echo "done"
-  else
-    echo "Bash is up-to-date."
-  fi
-}
-
-
 # ==============================================================================
 # Main
 # ==============================================================================
@@ -164,11 +149,6 @@ install_homebrew
 echo ""
 echo "__ Installing Packages __"
 install_packages
-
-
-echo ""
-echo "__ Upgrading Bash __"
-upgrade_bash
 
 
 echo ""

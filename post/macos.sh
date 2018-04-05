@@ -86,6 +86,7 @@ done
 echo "Installing Homebrew casks... "
 
 brew tap caskroom/cask
+
 for cask in "${CASKS[@]}"
 do
   if brew cask info "$cask" 2>&1 | grep -Eq '^Not installed$'; then
@@ -117,10 +118,22 @@ security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
 #
 # Add Bash 4 to global shell conf
 #
-echo "Adding Bash 4 to available shells... "
+if [[ -x /usr/local/bin/bash ]]; then
+  echo "Adding Bash 4 to available shells... "
 
-if ! grep -q '/usr/local/bin/bash' /etc/shells; then
-  sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
+  if ! grep -q '/usr/local/bin/bash' /etc/shells; then
+    sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
+  fi
+
+  user_shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
+
+  if [ "$user_shell" != "/usr/local/bin/bash" ]; then
+    echo -n "Setting default shell... "
+    chsh -s /usr/local/bin/bash "$(whoami)"
+    echo "done"
+  else
+    echo "Bash is up-to-date."
+  fi
 fi
 
 
