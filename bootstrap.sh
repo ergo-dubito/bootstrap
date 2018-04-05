@@ -69,11 +69,8 @@ function add_git_hooks () {
   local githook_postmerge
   githook_postmerge="$DOTFILES_DIR/.git/hooks/post-merge"
 
-  whichever "wget"
-  WGET="$BIN_PATH/wget"
-
   echo -n "Downloading git hooks... "
-  if "$WGET" "$BOOTSTRAP_ASSETS/git/post-merge" -qO "$githook_postmerge"; then
+  if wget "$BOOTSTRAP_ASSETS/git/post-merge" -qO "$githook_postmerge"; then
     chmod u+x "$githook_postmerge"
     echo "done"
   else
@@ -133,7 +130,7 @@ function generate_passphrase () {
   fi
 
   if [[ ! -e "$DICT" ]]; then
-    "$WGET" "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$PASSPHRASE_TMP"
+    wget "$BOOTSTRAP_ASSETS/dictionary.7z" -qO "$PASSPHRASE_TMP"
     7z x "$PASSPHRASE_TMP" -o"$HOME"/.ssh/ >/dev/null 2>&1
   fi
 
