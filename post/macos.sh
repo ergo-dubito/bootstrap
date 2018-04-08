@@ -142,10 +142,7 @@ fi
 #
 echo "Setting hostname to ${_HOSTNAME}... "
 
-sudo scutil --set HostName "${_HOSTNAME}.local"
-sudo scutil --set LocalHostName "${_HOSTNAME}"
-sudo scutil --set ComputerName "${_HOSTNAME}"
-sudo dscacheutil -flushcache
+"$HOME"/.local/bin/set-hostname "${_HOSTNAME}"
 
 
 #
