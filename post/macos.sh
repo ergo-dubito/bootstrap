@@ -33,6 +33,7 @@ CASKS=(
   coda
   docker
   fantastical
+  fedora-media-writer
   firefox
   gmvault
   google-backup-and-sync
