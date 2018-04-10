@@ -48,7 +48,7 @@ CASKS=(
   musicbrainz-picard
   osxfuse
   plexamp
-  sip
+  sourcetree
   spotify
   textmate
   transmit
