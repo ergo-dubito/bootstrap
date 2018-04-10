@@ -30,6 +30,7 @@ CASKS=(
   anaconda
   appcleaner
   bartender
+  box-sync
   coda
   docker
   fantastical
@@ -40,6 +41,7 @@ CASKS=(
   google-chrome
   imazing-mini
   istat-menus
+  keepassx
   keepingyouawake
   keka
   macdown
@@ -47,13 +49,12 @@ CASKS=(
   osxfuse
   plexamp
   sip
-  slack
   spotify
   textmate
   transmit
   tripmode
+  typora
   unrarx
-  virtualbox
   vlc
   xquartz
 )
@@ -106,17 +107,6 @@ done
 
 
 #
-# Require admin to make System Preference changes
-#
-echo "Securing System Preferences... "
-
-sysprefs=$(mktemp)
-security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
-/usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
-security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
-
-
-#
 # Add Bash 4 to global shell conf
 #
 if [[ -x /usr/local/bin/bash ]]; then
@@ -136,6 +126,17 @@ if [[ -x /usr/local/bin/bash ]]; then
     echo "Bash is up-to-date."
   fi
 fi
+
+
+#
+# Require admin to make System Preference changes
+#
+echo "Securing System Preferences... "
+
+sysprefs=$(mktemp)
+security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
+/usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
+security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
 
 
 #
