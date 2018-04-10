@@ -11,6 +11,7 @@ PACKAGES=(
   bash-git-prompt
   coreutils
   git
+  git-flow
   heroku
   markdown
   mas
