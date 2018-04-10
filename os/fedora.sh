@@ -55,6 +55,9 @@ PACKAGES=(
 # ==============================================================================
 
 function install_repos {
+  # Ensure dnf plugins package is installed
+  sudo dnf -yq install dnf-plugins-core >/dev/null
+
   _repos_import_gpgkeys
   _repos_add
   _repos_enable
@@ -71,8 +74,6 @@ function _repos_import_gpgkeys {
 }
 
 function _repos_add {
-  sudo dnf -yq install dnf-plugins-core >/dev/null
-
   for repo in "${REPOSITORIES[@]}"
   do
     reponame=$(basename -s .repo "$repo")
@@ -123,14 +124,6 @@ function _pkgs_upgrade {
 # ==============================================================================
 # Main
 # ==============================================================================
-
-echo ""
-echo "__ Configuring System __"
-
-if [[ ! -f "$SUDOERS_FILE" ]]; then
-  echo "Setting 'wheel' group to NOPASSWD mode..."
-  sudo bash -c "echo '$SUODERS_RULE' > '$SUDOERS_FILE'"
-fi
 
 echo ""
 echo "__ Installing Repositories __"
