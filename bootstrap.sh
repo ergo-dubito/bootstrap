@@ -7,24 +7,45 @@ set -eu
 # Variables
 # ==============================================================================
 
+
+#
+# Internal
+#
 TRUE=0
 FALSE=1
 
 OS=""
-USER_MODE="$FALSE"
 
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
 DICT_TMP="$(mktemp)"
-DICT_DIR="/usr/local/share/dict"
+DICT_DIR="$HOME/.local/share/dict"
 DICT="$DICT_DIR/words"
 
 PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
 
-BOOTSTRAP_REPO="https://raw.githubusercontent.com/bradleyfrank/bootstrap"
+USER_MODE="$FALSE"
+
+PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
+BIN_PATH="NaN"
+
+DIRECTORIES=(
+  "$HOME/Development"
+  "$HOME/.ssh"
+  "$HOME/.local"
+  "$HOME/.config"
+  "$DICT_DIR"
+)
+
+#
+# External
+#
+GH_RAW="https://raw.githubusercontent.com"
+
+BOOTSTRAP_REPO="$GH_RAW/bradleyfrank/bootstrap"
 BOOTSTRAP_URL="$BOOTSTRAP_REPO/master"
 BOOTSTRAP_ASSETS="$BOOTSTRAP_REPO/master/assets"
 
@@ -37,17 +58,6 @@ STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 # GitHub RSA SHA256 fingerprint
 # https://help.github.com/articles/github-s-ssh-key-fingerprints/
 GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
-
-PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
-BIN_PATH="NaN"
-
-DIRECTORIES=(
-  "$HOME/Development"
-  "$HOME/.ssh"
-  "$HOME/.local"
-  "$HOME/.config"
-  "$DICT_DIR"
-)
 
 
 # ==============================================================================
