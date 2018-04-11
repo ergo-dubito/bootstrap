@@ -37,7 +37,9 @@ PACKAGES=(
   perf
   p7zip
   p7zip-plugins
+  powerline-fonts
   python3
+  seahorse
   stow
   strace
   thefuck
