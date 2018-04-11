@@ -255,6 +255,9 @@ function set_variables () {
   if [[ "$OS" == "macos" ]]; then
     PIP="pip3"
     SHUF="gshuf"
+  elif [[ "$OS" == "fedora" ]]; then
+    PIP="pip3"
+    SHUF="shuf"
   else
     PIP="pip"
     SHUF="shuf"
