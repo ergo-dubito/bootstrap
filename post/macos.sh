@@ -48,6 +48,7 @@ CASKS=(
   musicbrainz-picard
   osxfuse
   plexamp
+  pycharm
   sourcetree
   spotify
   textmate
