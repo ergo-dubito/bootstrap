@@ -22,6 +22,7 @@ REPOSITORIES=(
 )
 
 PACKAGES=(
+  bluefish
   docker-ce
   ffmpeg
   git
