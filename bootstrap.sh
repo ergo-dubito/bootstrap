@@ -36,6 +36,7 @@ DIRECTORIES=(
   "$HOME/Development"
   "$HOME/.ssh"
   "$HOME/.local"
+  "$HOME/.local/share"
   "$HOME/.config"
   "$DICT_DIR"
 )
@@ -67,7 +68,9 @@ GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 PYTHON_PACKAGES=(
   powerline-status
   powerline-gitstatus
+  pycodestyle
   pydf
+  pylint
 )
 
 
