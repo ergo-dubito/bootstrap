@@ -4,9 +4,6 @@
 # Variables
 # ==============================================================================
 
-SUDOERS_FILE="/etc/sudoers.d/nopasswd"
-SUODERS_RULE="%wheel  ALL=(ALL)  NOPASSWD: ALL"
-
 GPG_KEYS=(
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-slaanesh"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-docker-ce"
@@ -88,7 +85,7 @@ function _repos_add {
 
 function _repos_enable {
   echo -n "Enabling Fedora-specific repos... "
-  sudo dnf config-manager --enablerepo docker-ce-stable-centos >/dev/null 2>&1
+  sudo dnf config-manager --enablerepo docker-ce-stable-fedora >/dev/null 2>&1
   sudo dnf config-manager --enablerepo puppet5-el >/dev/null 2>&1
   echo "done"
 }
