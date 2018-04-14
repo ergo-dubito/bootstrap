@@ -223,6 +223,8 @@ function install_dict () {
       mv "$DICT_DIR/dictionary" "$DICT"
       echo "done"
     fi
+  else
+    echo "done"
   fi
 }
 
@@ -476,6 +478,7 @@ shopt -s nullglob
 if git branch --list | grep -q "$HOSTNAME" >/dev/null 2>&1; then
   "$GIT" checkout master >/dev/null 2>&1
   stow_packages=(*/)
+
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
@@ -485,14 +488,19 @@ if git branch --list | grep -q "$HOSTNAME" >/dev/null 2>&1; then
 else
   "$GIT" checkout -b "$HOSTNAME" >/dev/null 2>&1
   stow_packages=(*/)
+
   for pkg in "${stow_packages[@]}"; do
     _pkg=$(echo "$pkg" | cut -d '/' -f 1)
     echo -n "Stowing $_pkg... "
     "$STOW" -d "$DOTFILES_DIR" -t "$HOME" --adopt "$_pkg"
     echo "done"
   done
+
   "$GIT" add -A >/dev/null 2>&1
-  "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null 2>&1
+  if git commit --dry-run >/dev/null 2>&1; then
+    # Only commit if there are changes to commit.
+    "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null 2>&1
+  fi
   "$GIT" checkout master >/dev/null 2>&1
 fi
 
@@ -596,7 +604,7 @@ fi
 echo " * Push dotfile repo updates"
 
 if [[ "$OS" == "macos" ]]; then
-  echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash"
+  echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash [-s -- -n hostname]"
 fi
 
 echo ""
