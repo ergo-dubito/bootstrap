@@ -138,6 +138,256 @@ function _font_install {
 }
 
 
+function set_macos_defaults {
+  _defaults_app
+  _defaults_desktop
+  _defaults_filesystem
+  _defaults_interface
+  _defaults_io
+  _defaults_system
+
+  killall Dock
+}
+
+
+function _defaults_app {
+  echo -n "App settings... "
+
+  # ==== Time Machine ====
+
+  # Prevent Time Machine from prompting to use new hard drives as backup volume
+  defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+
+  # ==== Disk Utility ====
+
+  # Enable the debug menu in Disk Utility
+  defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
+  defaults write com.apple.DiskUtility advanced-image-options -bool true
+
+  # ==== Mail ====
+
+  # Show Mail attachments as icons
+  defaults write com.apple.mail DisableInlineAttachmentViewing -bool yes
+
+  # ==== Safari ====
+
+  # Enable the Debug menu
+  defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+
+  # Enable the Develop menu
+  defaults write com.apple.Safari IncludeDevelopMenu -bool true
+
+  # Enable the Web Inspector
+  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+
+  # Disable Safari autofills
+  defaults write com.apple.safari autofillfromaddressbook -bool false
+  defaults write com.apple.safari autofillpasswords -bool false
+  defaults write com.apple.safari autofillcreditcarddata -bool false
+  defaults write com.apple.safari autofillmiscellaneousforms -bool false
+
+  # ==== Terminal ====
+
+  # Make new tabs open in default directory
+  defaults write com.apple.Terminal NewTabWorkingDirectoryBehavior -int 1
+
+  # Set default Shell to updated Bash
+  defaults write com.apple.Terminal Shell -string "/usr/local/bin/bash"
+
+  # ==== TextEdit ====
+
+  # Use Plain Text Mode as Default
+  defaults write com.apple.TextEdit RichText -int 0
+
+  echo "done"
+}
+
+
+function _defaults_desktop {
+  echo -n "Desktop settings... "
+
+  # Show filename extensions by default
+  defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+  # Disable creation of .DS_Store files on network volumes
+  defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+  # ==== Finder ====
+
+  # Hide icons for hard drives, servers, and removable media on the desktop"
+  defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool false
+  defaults write com.apple.finder ShowHardDrivesOnDesktop -bool false
+  defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool false
+  defaults write com.apple.finder ShowMountedServersOnDesktop -bool false
+
+  # Show status bar by default
+  defaults write com.apple.finder ShowStatusBar -bool true
+
+  # Show Finder breadcrumb menu
+  defaults write com.apple.finder ShowPathbar -bool true
+
+  # Disable the warning when changing a file extension
+  defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+  # Avoid creating .DS_Store files on network volumes
+  defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+  # Default view style
+  defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
+
+  # Unhide user library
+  chflags nohidden ~/Library
+
+  # Set default location for new windows
+  defaults write com.apple.finder NewWindowTarget -string "PfLo"
+  defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Downloads/"
+
+  # Hide desktop icons
+  defaults write com.apple.finder CreateDesktop -bool false
+
+  # ==== Dock ====
+
+  # Set Dock to auto-hide
+  defaults write com.apple.dock autohide -bool true
+
+  # Convert Dock to taskbar
+  defaults write com.apple.dock static-only -bool true
+
+  # Disable bouncing Dock icons
+  defaults write com.apple.dock no-bouncing -bool true
+
+  # Set Dock size
+  defaults write com.apple.dock tilesize -int 43
+
+  # ==== Screenshots ====
+
+  # Save screenshots to ~/Downloads
+  defaults write com.apple.screencapture location ~/Downloads
+
+  # Save screenshots as PNG
+  defaults write com.apple.screencapture type -string "png"
+
+  # ==== Expose ====
+
+  # Hot corner (bottom-left): show desktop
+  defaults write com.apple.dock wvous-bl-corner -int 4
+  defaults write com.apple.dock wvous-bl-modifier -int 0
+
+  # Hot corner (bottom-right): screen saver
+  defaults write com.apple.dock wvous-br-corner -int 5
+  defaults write com.apple.dock wvous-br-modifier -int 0
+
+  # Hot corner (top-left): mission control
+  defaults write com.apple.dock wvous-tl-corner -int 2
+  defaults write com.apple.dock wvous-tl-modifier -int 0
+
+  # Hot corner (top-right): application windows
+  defaults write com.apple.dock wvous-tr-corner -int 3
+  defaults write com.apple.dock wvous-tr-modifier -int 0
+
+  # Disable automatically rearranging Spaces
+  defaults write com.apple.dock mru-spaces -bool false
+
+  echo "done"
+}
+
+
+function _defaults_interface {
+  echo -n "Interface settings... "
+
+  # Expand save panel by default
+  defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+  defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+  defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
+  defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+
+  # Quit printer app after print jobs complete
+  defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+
+  echo "done"
+}
+
+
+function _defaults_io {
+  echo -n "I/O settings... "
+
+  # Enable tap-to-click
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+  defaults write com.apple.AppleMultitouchtrackpad Clicking -bool true
+  defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+
+  # Two finger tap to right-click
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRightClick -bool true
+
+  # Enable hand resting
+  defaults write com.apple.AppleMultitouchtrackpad trackpadHandResting -bool true
+
+  # Pinch to zoom
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadPinch -bool true
+
+  # Two finger rotate
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRotate -bool true
+
+  # Two finger horizontal swipe between pages
+  defaults write NSGlobalDomain AppleEnableSwipeNavigateWithScrolls -bool true
+
+  # Three finger horizontal swipe between pages
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 1
+  defaults write com.apple.AppleMultitouchtrackpad TrackpadThreeFingerHorizSwipeGesture -int 1
+
+  # Show Notification Center with two finger swipe from fight edge
+  defaults write com.apple.AppleMultitouchtrackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
+
+  # Smart zoom
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadTwoFingerDoubleTapGesture -int 1
+
+  # Three finger tap to look up
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadThreeFingerTapGesture -int 2
+
+  # Set very low key repeat rates
+  defaults write NSGlobalDomain InitialKeyRepeat -int 25
+  defaults write NSGlobalDomain KeyRepeat -int 1
+
+  echo "done"
+}
+
+
+function _defaults_system {
+  echo -n "System settings... "
+
+  # ==== Security Settings ====
+
+  # Require password as soon as screensaver or sleep mode starts
+  defaults write com.apple.screensaver askForPassword -int 1
+
+  # Grace period for requiring password to unlock
+  defaults write com.apple.screensaver askForPasswordDelay -int 5
+
+  # ==== System Updates ====
+
+  # Check for software updates daily
+  defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+
+  # ==== Power Settings ====
+
+  # Set screensaver idle time
+  defaults -currentHost write com.apple.screensaver idleTime 300
+
+  # Put display to sleep after 5 Minutes of inactivity
+  sudo pmset displaysleep 5
+
+  # Put Computer to Sleep after 15 Minutes of Inactivity
+  sudo pmset sleep 15
+
+  # Set System Sleep Idle Time to 60 Minutes
+  sudo systemsetup -setcomputersleep 60
+
+  echo "done"
+}
+
+
 # ==============================================================================
 # Main
 # ==============================================================================
@@ -154,214 +404,4 @@ install_packages
 
 echo ""
 echo "__ Configuring System __"
-
-# ==== App Settings ====
-echo -n "App settings... "
-
-# Prevent Time Machine from prompting to use new hard drives as backup volume
-defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
-
-# Automatically quit printer app once the print jobs complete
-defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
-
-# Enable the debug menu in Disk Utility
-defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
-defaults write com.apple.DiskUtility advanced-image-options -bool true
-
-# Show Mail attachments as icons
-defaults write com.apple.mail DisableInlineAttachmentViewing -bool yes
-
-echo "done"
-
-
-# ==== Desktop Settings ====
-echo -n "Desktop settings... "
-
-# Set Dock to auto-hide
-defaults write com.apple.dock autohide -bool true
-
-# Convert Dock to taskbar
-defaults write com.apple.dock static-only -bool true
-
-# Disable bouncing Dock icons
-defaults write com.apple.dock no-bouncing -bool true
-
-# Hide desktop icons
-defaults write com.apple.finder CreateDesktop -bool false
-
-# Set Dock size
-defaults write com.apple.dock tilesize -int 43
-
-# Save screenshots to ~/Downloads
-defaults write com.apple.screencapture location ~/Downloads
-
-# Save screenshots as PNG
-defaults write com.apple.screencapture type -string "png"
-
-# Hot corner (bottom-left): show desktop
-defaults write com.apple.dock wvous-bl-corner -int 4
-defaults write com.apple.dock wvous-bl-modifier -int 0
-
-# Hot corner (bottom-right): screen saver
-defaults write com.apple.dock wvous-br-corner -int 5
-defaults write com.apple.dock wvous-br-modifier -int 0
-
-# Hot corner (top-left): mission control
-defaults write com.apple.dock wvous-tl-corner -int 2
-defaults write com.apple.dock wvous-tl-modifier -int 0
-
-# Hot corner (top-right): application windows
-defaults write com.apple.dock wvous-tr-corner -int 3
-defaults write com.apple.dock wvous-tr-modifier -int 0
-
-killall Dock
-echo "done"
-
-
-# ==== Filesystem Settings ====
-echo -n "Filesystem settings... "
-
-# Avoid creating .DS_Store files on network volumes
-defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-
-echo "done"
-
-
-# ==== Finder Settings ====
-echo -n "Finder settings... "
-
-# Show filename extensions by default
-defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-
-# Hide icons for hard drives, servers, and removable media on the desktop"
-defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool false
-
-# Show status bar by default
-defaults write com.apple.finder ShowStatusBar -bool true
-
-# Show Finder breadcrumb menu
-defaults write com.apple.finder ShowPathbar -bool true
-
-# Disable the warning when changing a file extension
-defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
-
-# Default view style
-defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
-
-# Unhide user library
-chflags nohidden ~/Library
-
-# Set default location for new windows
-defaults write com.apple.finder NewWindowTarget -string "PfLo"
-defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Downloads/"
-
-# Disable creation of .DS_Store files on network volumes
-defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-
-echo "done"
-
-
-# ==== Interface Settings ====
-echo -n "Interface settings... "
-
-# Expand save panel by default
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
-
-echo "done"
-
-
-# ==== I/O Settings ====
-echo -n "I/O settings... "
-
-# Enable tap-to-click
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-defaults write com.apple.AppleMultitouchtrackpad Clicking -bool true
-defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-
-# Two finger tap to right-click
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRightClick -bool true
-
-# Enable hand resting
-defaults write com.apple.AppleMultitouchtrackpad trackpadHandResting -bool true
-
-# Pinch to zoom
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadPinch -bool true
-
-# Two finger rotate
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadRotate -bool true
-
-# Two finger horizontal swipe between pages
-defaults write NSGlobalDomain AppleEnableSwipeNavigateWithScrolls -bool true
-
-# Three finger horizontal swipe between pages
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerHorizSwipeGesture -int 1
-defaults write com.apple.AppleMultitouchtrackpad TrackpadThreeFingerHorizSwipeGesture -int 1
-
-# Show Notification Center with two finger swipe from fight edge
-defaults write com.apple.AppleMultitouchtrackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 3
-
-# Smart zoom
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadTwoFingerDoubleTapGesture -int 1
-
-# Three finger tap to look up
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad trackpadThreeFingerTapGesture -int 2
-
-# Set very low key repeat rates
-defaults write NSGlobalDomain InitialKeyRepeat -int 25
-defaults write NSGlobalDomain KeyRepeat -int 1
-
-echo "done"
-
-
-# ==== Safari Settings ====
-echo -n "Safari settings... "
-
-# Enable the Debug menu
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-
-# Enable the Develop menu
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-
-# Enable the Web Inspector
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-
-echo "done"
-
-
-# ==== System Settings ====
-echo -n "System settings... "
-
-# Check for software updates daily
-defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
-
-# Set screensaver idle time
-defaults -currentHost write com.apple.screensaver idleTime 300
-
-# Require password as soon as screensaver or sleep mode starts
-defaults write com.apple.screensaver askForPassword -int 1
-
-# Grace period for requiring password to unlock
-defaults write com.apple.screensaver askForPasswordDelay -int 5
-
-echo "done"
-
-
-# ==== Terminal Settings ====
-echo -n "Terminal settings... "
-
-# Default profile
-defaults write com.apple.Terminal "Default Window Settings" -string "Solarized Dark"
-defaults write com.apple.Terminal "Startup Window Settings" -string "Solarized Dark"
-
-# Make new tabs open in default directory
-defaults write com.apple.Terminal NewTabWorkingDirectoryBehavior -int 1
-
-# Set default Shell to updated Bash
-defaults write com.apple.Terminal Shell -string "/usr/local/bin/bash"
-
-echo "done"
+set_macos_defaults
