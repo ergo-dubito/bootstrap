@@ -15,6 +15,8 @@ MAS_APPS=(
   924726344
   # Evernote
   406056744
+  # PasteBot
+  1179623856
   # Pixelmator
   407963104
   # Reeder 3
