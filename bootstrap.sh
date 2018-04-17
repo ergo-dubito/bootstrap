@@ -276,10 +276,14 @@ function set_variables () {
 # Download and source OS-specific script as a sub-shell
 # ------------------------------------------------------------------------------
 function source_remote_file () {
-  f=$(mktemp)
-  curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
-  # shellcheck source=/dev/null
-  (. "$f")
+  if [[ USER_MODE -ne "$TRUE" ]]; then
+    f=$(mktemp)
+    curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
+    # shellcheck source=/dev/null
+    (. "$f")
+  else
+    echo "Skipping OS-specific bootstrap... "
+  fi
 }
 
 
