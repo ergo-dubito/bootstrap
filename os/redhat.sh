@@ -5,30 +5,43 @@
 # ==============================================================================
 
 GPG_KEYS=(
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-slaanesh"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-docker-ce"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-google-chrome"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-puppet5"
-  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-remi"
 )
 
 REPOSITORIES=(
+  "$BOOTSTRAP_ASSETS/repos.d/fedora-multimedia.repo"
   "$BOOTSTRAP_ASSETS/repos.d/docker-ce.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/google-chrome.repo"
   "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
-  "$BOOTSTRAP_ASSETS/repos.d/remi.repo"
 )
 
 PACKAGES=(
+  bluefish
   docker-ce
-  epel-release
+  ffmpeg
   git
+  google-chrome-stable
+  HandBrake-cli
   htop
+  libmp4v2
+  mkvtoolnix
   mosh
+  mpv
   ncdu
   nmap
   perf
   p7zip
   p7zip-plugins
+  powerline-fonts
+  python3
+  seahorse
   stow
   strace
+  thefuck
+  tldr
   tmux
   tree
   vim
@@ -42,6 +55,9 @@ PACKAGES=(
 # ==============================================================================
 
 function install_repos {
+  # Ensure dnf plugins package is installed
+  sudo dnf -yq install dnf-plugins-core >/dev/null
+
   _repos_import_gpgkeys
   _repos_add
   _repos_enable
@@ -58,28 +74,26 @@ function _repos_import_gpgkeys {
 }
 
 function _repos_add {
-  sudo yum -yq install yum-utils >/dev/null
-
   for repo in "${REPOSITORIES[@]}"
   do
     reponame=$(basename -s .repo "$repo")
     echo -n "Adding repository $reponame... "
-    sudo yum-config-manager --add-repo="$repo" >/dev/null
+    sudo dnf config-manager --add-repo="$repo" >/dev/null
     echo "done"
   done
 }
 
 function _repos_enable {
-  echo -n "Enabling CentOS-specific repos... "
-  sudo yum-config-manager --enable docker-ce-stable-centos >/dev/null 2>&1
-  sudo yum-config-manager --enable puppet5-el >/dev/null 2>&1
+  echo -n "Enabling Fedora-specific repos... "
+  sudo dnf config-manager --enablerepo docker-ce-stable-fedora >/dev/null 2>&1
+  sudo dnf config-manager --enablerepo puppet5-el >/dev/null 2>&1
   echo "done"
 }
 
 function _repos_cleanup {
   echo -n "Cleaning up repo cache... "
-  sudo yum clean all >/dev/null
-  sudo yum makecache >/dev/null
+  sudo dnf clean all >/dev/null
+  sudo dnf makecache >/dev/null
   echo "done"
 }
 
@@ -92,7 +106,7 @@ function _pkgs_install {
   for package in "${PACKAGES[@]}"
   do
     echo -n "Installing $package... "
-    if sudo yum install -yq "$package" >/dev/null 2>&1; then
+    if sudo dnf install -yq "$package" >/dev/null 2>&1; then
       echo "done"
     else
       echo "failed"
@@ -102,7 +116,7 @@ function _pkgs_install {
 
 function _pkgs_upgrade {
   echo -n "Performing system updates... "
-  sudo yum update -yq >/dev/null 2>&1
+  sudo dnf upgrade -yq >/dev/null 2>&1
   echo "done"
 }
 

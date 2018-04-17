@@ -144,7 +144,6 @@ function generate_passphrase () {
     mkdir "$HOME"/.ssh
     chmod 700 "$HOME"/.ssh
   fi
-  
 
   echo -n "Generating passphrase... "
   "$SHUF" --random-source=/dev/random -n "$PASSPHRASE_WORDS" "$DICT" | tr A-Z a-z | sed -e ':a' -e 'N' -e '$!ba' -e "s/\\n/-/g" > "$PASSPHRASE_FILE"
@@ -194,7 +193,7 @@ function get_operating_system () {
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
   elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
-    OS="redhat"
+    OS="centos"
   else
     echo "failed"
     exit 1
@@ -233,23 +232,26 @@ function install_dict () {
 # Compile Stow from source if not installed by system
 # ------------------------------------------------------------------------------
 function install_stow () {
-  echo -n "Installing Stow... "
+  whichever "stow"
+  if [[ "$BIN_PATH" == "NaN" ]]; then
+    echo -n "Installing Stow... "
 
-  local tmp_fle
-  local tmp_dir
+    local tmp_fle
+    local tmp_dir
 
-  tmp_fle=$(mktemp)
-  tmp_dir=$(mktemp -d)
+    tmp_fle=$(mktemp)
+    tmp_dir=$(mktemp -d)
 
-  curl -L "$STOW_URL" > "$tmp_fle" 2>/dev/null
-  tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
-  pushd "$tmp_dir" >/dev/null 2>&1
-  ./configure --prefix="$HOME"/.local >/dev/null 2>&1
-  make >/dev/null 2>&1
-  make install >/dev/null 2>&1
-  popd >/dev/null 2>&1
+    curl -L "$STOW_URL" > "$tmp_fle" 2>/dev/null
+    tar -xzf "$tmp_fle" -C "$tmp_dir" --strip-components 1
+    pushd "$tmp_dir" >/dev/null 2>&1
+    ./configure --prefix="$HOME"/.local >/dev/null 2>&1
+    make >/dev/null 2>&1
+    make install >/dev/null 2>&1
+    popd >/dev/null 2>&1
 
-  echo "done"
+    echo "done"
+  fi
 }
 
 
@@ -350,11 +352,12 @@ done
 
 
 # ------------------------------------------------------------------------------
-# Load OS-specific script
+# Initial configurations
 # ------------------------------------------------------------------------------
 get_operating_system
 source_remote_file
 set_variables
+install_stow
 
 
 # ------------------------------------------------------------------------------
