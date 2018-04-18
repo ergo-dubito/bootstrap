@@ -125,15 +125,18 @@ function add_to_known_hosts () {
 function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
-  if "$GIT" clone --recurse-submodules "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1; then
+  if "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1; then
+
     pushd "$DOTFILES_DIR" >/dev/null 2>&1
+    "$GIT" submodule update --init --recursive >/dev/null 2>&1
     "$GIT" remote set-url origin "$DOTFILES_GIT"
     "$GIT" config core.fileMode false
     popd >/dev/null 2>&1
-    echo "done"
 
     add_git_hooks
     fix_permissions
+
+    echo "done"
   else
     echo "failed"
     exit 1
