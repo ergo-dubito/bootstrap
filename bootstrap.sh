@@ -57,10 +57,6 @@ DOTFILES_DIR="$HOME/.dotfiles"
 
 STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
-# GitHub RSA SHA256 fingerprint
-# https://help.github.com/articles/github-s-ssh-key-fingerprints/
-FINGERPRINT_GITHUB="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
-
 
 # ==============================================================================
 # Packages
@@ -92,29 +88,6 @@ function add_git_hooks () {
     echo "done"
   else
     echo "failed"
-  fi
-}
-
-# ------------------------------------------------------------------------------
-# Add GitHub to known_hosts
-# ------------------------------------------------------------------------------
-function add_to_known_hosts () {
-  local url="$1"
-  local url_fingerprint="$2"
-
-  keyscan=$(ssh-keyscan "$url" 2>/dev/null)
-  fingerprint=$(ssh-keygen -lf <(echo "$keyscan") | cut -d ' ' -f 2)
-
-  if [[ "$fingerprint" == "$url_fingerprint" ]]; then
-    key="$(echo "$keyscan" | cut -d ' ' -f 3)"
-    if ! grep -qr "$key" "$known_hosts" 2>/dev/null; then
-      echo -n "Adding $url SSH key to known_hosts... "
-      echo "$keyscan" >> "$known_hosts"
-      echo "done"
-    fi
-  else
-    echo "Error: $url SSH key fingerprints do not match."
-    exit 1
   fi
 }
 
@@ -213,8 +186,6 @@ function get_operating_system () {
     fi
   elif [ -f /etc/os-release ]; then
     OS=$(sed -n -e 's/^ID=//p' /etc/os-release)
-  elif type lsb_release >/dev/null 2>&1; then
-    OS=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
   elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
@@ -613,9 +584,6 @@ if [[ $EXCEPT != *"s"* ]]; then
   fi
 fi
 
-# Add hosts to known_hosts
-add_to_known_hosts "github.com" "$FINGERPRINT_GITHUB"
-
 
 # ------------------------------------------------------------------------------
 # Exit
@@ -636,7 +604,7 @@ fi
 echo " * Push dotfile repo updates"
 
 if [[ "$OS" == "macos" ]]; then
-  echo " * Run post-bootstrap: curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash [-s -- -n hostname]"
+  echo " * Run post-bootstrap"
 fi
 
 echo ""
