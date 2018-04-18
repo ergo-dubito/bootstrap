@@ -126,17 +126,15 @@ function clone_dotfiles_repo () {
   echo -n "Cloning dotfiles repo... "
 
   if "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1; then
-
     pushd "$DOTFILES_DIR" >/dev/null 2>&1
     "$GIT" submodule update --init --recursive >/dev/null 2>&1
     "$GIT" remote set-url origin "$DOTFILES_GIT"
     "$GIT" config core.fileMode false
     popd >/dev/null 2>&1
+    echo "done"
 
     add_git_hooks
     fix_permissions
-
-    echo "done"
   else
     echo "failed"
     exit 1
@@ -522,7 +520,7 @@ popd >/dev/null 2>&1
 pushd "$DOTFILES_DIR" >/dev/null 2>&1
 shopt -s nullglob
 
-if git branch --list | grep -q "$HOSTNAME" >/dev/null 2>&1; then
+if git branch -a | grep -qE "$HOSTNAME" >/dev/null 2>&1; then
   "$GIT" checkout master >/dev/null 2>&1
   stow_packages=(*/)
 
