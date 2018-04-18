@@ -356,11 +356,16 @@ done
 
 
 # ------------------------------------------------------------------------------
-# Initial configurations
+# Find OS; run OS-specific bootstrap; set certain PATH variables
 # ------------------------------------------------------------------------------
 get_operating_system
 source_remote_file
 set_variables
+
+
+# ------------------------------------------------------------------------------
+# Install stow if not installed by system
+# ------------------------------------------------------------------------------
 install_stow
 
 
@@ -380,8 +385,9 @@ if [[ "$BIN_PATH" != "NaN" ]]; then
   PIP="$BIN_PATH/$PIP"
   echo "found"
 else
+  # Not fatal; just skip installing Python packages
+  PIP="NaN"
   echo "failed"
-  exit 1
 fi
 
 #
@@ -433,15 +439,19 @@ fi
 echo ""
 echo "__ Installing Python Packages __"
 
-for pypkg in "${PYTHON_PACKAGES[@]}"
-do
-  echo -n "Installing $pypkg... "
-  if "$PIP" install -U --user "$pypkg" -qqq 2>/dev/null; then
-    echo "done"
-  else
-    echo "failed"
-  fi
-done
+if [[ "$PIP" != "NaN" ]]; then
+  for pypkg in "${PYTHON_PACKAGES[@]}"
+  do
+    echo -n "Installing $pypkg... "
+    if "$PIP" install -U --user "$pypkg" -qqq 2>/dev/null; then
+      echo "done"
+    else
+      echo "failed"
+    fi
+  done
+else
+  echo "Skipping Python packages... "
+fi
 
 
 # ------------------------------------------------------------------------------
