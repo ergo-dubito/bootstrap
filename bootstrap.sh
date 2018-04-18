@@ -188,8 +188,10 @@ function get_operating_system () {
     OS=$(sed -n -e 's/^ID=//p' /etc/os-release)
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
-  elif [ -f /etc/centos-release ] || [ -f /etc/redhat-release ]; then
+  elif [ -f /etc/centos-release ]; then
     OS="centos"
+  elif [ -f /etc/redhat-release ]; then
+    OS="redhat"
   else
     echo "failed"
     exit 1
@@ -582,6 +584,8 @@ if [[ $EXCEPT != *"s"* ]]; then
     "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
     popd >/dev/null 2>&1
   fi
+else
+  echo "Skipping SSH key creation... "
 fi
 
 
