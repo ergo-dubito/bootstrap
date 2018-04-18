@@ -11,7 +11,9 @@ Bootstraps MacOS and RedHat-based distros.
 
 ## Bootstrap
 
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash`
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -u]`
+
+* `-u` user mode: skips any command that executes with sudo; i.e. should only affect user profile.
 
 ## Post Bootstrap
 
