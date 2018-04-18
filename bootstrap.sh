@@ -28,6 +28,7 @@ PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
 
 USER_MODE="$FALSE"
+EXCEPT=""
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH="NaN"
@@ -58,7 +59,7 @@ STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
 # GitHub RSA SHA256 fingerprint
 # https://help.github.com/articles/github-s-ssh-key-fingerprints/
-GITHUB_FINGERPRINT="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
+FINGERPRINT_GITHUB="SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8"
 
 
 # ==============================================================================
@@ -91,6 +92,29 @@ function add_git_hooks () {
     echo "done"
   else
     echo "failed"
+  fi
+}
+
+# ------------------------------------------------------------------------------
+# Add GitHub to known_hosts
+# ------------------------------------------------------------------------------
+function add_to_known_hosts () {
+  local url="$1"
+  local url_fingerprint="$2"
+
+  keyscan=$(ssh-keyscan "$url" 2>/dev/null)
+  fingerprint=$(ssh-keygen -lf <(echo "$keyscan") | cut -d ' ' -f 2)
+
+  if [[ "$fingerprint" == "$url_fingerprint" ]]; then
+    key="$(echo "$keyscan" | cut -d ' ' -f 3)"
+    if ! grep -qr "$key" "$known_hosts" 2>/dev/null; then
+      echo -n "Adding $url SSH key to known_hosts... "
+      echo "$keyscan" >> "$known_hosts"
+      echo "done"
+    fi
+  else
+    echo "Error: $url SSH key fingerprints do not match."
+    exit 1
   fi
 }
 
@@ -324,7 +348,7 @@ function whichever () {
 # Main
 # ==============================================================================
 
-while getopts 'hu' flag; do
+while getopts 'hux:' flag; do
   case "${flag}" in
     h )
       echo "bootstrap.sh - sets up system and configures user profile"
@@ -334,9 +358,12 @@ while getopts 'hu' flag; do
       echo "Options:"
       echo "-h    print help menu and exit"
       echo "-u    user mode (skips configs that require root privileges)"
+      echo "-x    Skip the following section(s):"
+      echo "      s    SSH keys"
       exit 0
       ;;
     u ) USER_MODE="$TRUE" ;;
+    x ) EXCEPT="$OPTARG" ;;
     \?) exit 1 ;;
   esac
 done
@@ -533,73 +560,60 @@ echo "__ Configuring SSH __"
 # Set some variables
 authkeys="$DOTFILES_DIR/ssh/.ssh/authorized_keys"
 known_hosts="$HOME/.ssh/known_hosts"
-
 ssh_create_files=("$authkeys" "$known_hosts")
 sshkeys=("rsa" "ed25519")
-
-# Generate a temporary secure passphrase
-install_dict
-generate_passphrase
-
-# Loop through keys to generate
-for sshkey in "${sshkeys[@]}"; do
-  generate_sshkey "$sshkey"
-done
-
-# Save or delete temporary passphrase
-if [[ "$PASSPHRASE_SAVE" -eq "$FALSE" ]]; then
-  rm -f "$PASSPHRASE_FILE"
-else
-  chmod 400 "$PASSPHRASE_FILE"
-fi
-
-# Create required SSH files
-for ssh_file in "${ssh_create_files[@]}"; do
-  touch_file "$ssh_file" "0600"
-done
-
-# Add GitHub to known_hosts
-keyscan=$(ssh-keyscan github.com 2>/dev/null)
-fingerprint=$(ssh-keygen -lf <(echo "$keyscan") | cut -d ' ' -f 2)
-
-if [[ "$fingerprint" == "$GITHUB_FINGERPRINT" ]]; then
-  key="$(echo "$keyscan" | cut -d ' ' -f 3)"
-  if ! grep -qr "$key" "$known_hosts" 2>/dev/null; then
-    echo -n "Adding GitHub SSH key to known_hosts... "
-    echo "$keyscan" >> "$known_hosts"
-    echo "done"
-  fi
-else
-  echo "Error: GitHub SSH key fingerprints do not match."
-  exit 1
-fi
-
-# Add public keys to authorized_keys
-pushd "$HOME"/.ssh >/dev/null 2>&1
-
 commit="$FALSE"
-shopt -s nullglob
-keys=(*.pub)
 
-for key in "${keys[@]}"; do
-  publickey=$(<"$HOME"/.ssh/"$key" tr -d '\n')
+if [[ $EXCEPT != *"s"* ]]; then
+  # Generate a temporary secure passphrase
+  install_dict
+  generate_passphrase
 
-  if ! grep -rq "$publickey" "$authkeys"; then
-    echo -n "Adding $key... "
-    echo "$publickey" >> "$authkeys"
-    echo "done"
-    commit="$TRUE"
+  # Loop through keys to generate
+  for sshkey in "${sshkeys[@]}"; do
+    generate_sshkey "$sshkey"
+  done
+
+  # Save or delete temporary passphrase
+  if [[ "$PASSPHRASE_SAVE" -eq "$FALSE" ]]; then
+    rm -f "$PASSPHRASE_FILE"
+  else
+    chmod 400 "$PASSPHRASE_FILE"
   fi
-done
 
-popd >/dev/null 2>&1
+  # Create required SSH files
+  for ssh_file in "${ssh_create_files[@]}"; do
+    touch_file "$ssh_file" "0600"
+  done
 
-if [[ "$commit" -eq "$TRUE" ]]; then
-  pushd "$DOTFILES_DIR" >/dev/null 2>&1
-  "$GIT" add "$authkeys" >/dev/null 2>&1
-  "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
+  # Add public keys to authorized_keys
+  pushd "$HOME"/.ssh >/dev/null 2>&1
+  shopt -s nullglob
+  keys=(*.pub)
+
+  for key in "${keys[@]}"; do
+    publickey=$(<"$HOME"/.ssh/"$key" tr -d '\n')
+
+    if ! grep -rq "$publickey" "$authkeys"; then
+      echo -n "Adding $key... "
+      echo "$publickey" >> "$authkeys"
+      echo "done"
+      commit="$TRUE"
+    fi
+  done
+
   popd >/dev/null 2>&1
+
+  if [[ "$commit" -eq "$TRUE" ]]; then
+    pushd "$DOTFILES_DIR" >/dev/null 2>&1
+    "$GIT" add "$authkeys" >/dev/null 2>&1
+    "$GIT" commit -m "Added keys to authorized_keys for $HOSTNAME." >/dev/null
+    popd >/dev/null 2>&1
+  fi
 fi
+
+# Add hosts to known_hosts
+add_to_known_hosts "github.com" "$FINGERPRINT_GITHUB"
 
 
 # ------------------------------------------------------------------------------
@@ -614,7 +628,7 @@ fi
 
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
   echo " * Add id_ed25519 key to GitHub"
-else
+elif [[ -f "$HOME/.ssh/id_rsa.pub" ]]; then
   echo " * Add id_rsa key to GitHub"
 fi
 
