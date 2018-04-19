@@ -185,7 +185,7 @@ function get_operating_system () {
       exit 1
     fi
   elif [ -f /etc/os-release ]; then
-    OS=$(sed -n -e 's/^ID=//p' /etc/os-release)
+    OS=$(sed -n -e 's/^ID=//p' /etc/os-release | tr -d '"')
   elif [ -f /etc/fedora-release ]; then
     OS="fedora"
   elif [ -f /etc/centos-release ]; then
