@@ -113,7 +113,11 @@ function _pkgs_upgrade {
 
 echo ""
 echo "__ Installing Repositories __"
-install_repos
+if [[ $EXCEPT != *"r"* ]]; then
+  install_repos
+else
+  echo "Skipping repository installs... "
+fi
 
 echo ""
 echo "__ Installing Packages __"

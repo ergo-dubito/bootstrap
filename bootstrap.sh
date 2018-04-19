@@ -334,6 +334,7 @@ while getopts 'hux:' flag; do
       echo "-u    user mode (skips configs that require root privileges)"
       echo "-x    Skip the following section(s):"
       echo "      s    SSH keys"
+      echo "      r    add repos"
       exit 0
       ;;
     u ) USER_MODE="$TRUE" ;;
