@@ -11,7 +11,7 @@ Bootstraps MacOS and RedHat-based distros.
 
 ## Bootstrap
 
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -u | [-x s]]`
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -t | -u | [-x gprsuy]]`
 
 * `-t` dumb terminal mode; implies `-x gprsu`
 * `-u` user mode; implies `-x pru`
