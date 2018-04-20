@@ -443,7 +443,9 @@ fi
 echo ""
 echo "__ Installing Python Packages __"
 
-if [[ "$PIP" != "NaN" ]] || [[ $EXCEPT != *"y"* ]]; then
+if [[ "$PIP" == "NaN" ]] || [[ $EXCEPT == *"y"* ]]; then
+  echo "Skipping Python packages... "
+else
   for pypkg in "${PYTHON_PACKAGES[@]}"
   do
     echo -n "Installing $pypkg... "
@@ -453,8 +455,6 @@ if [[ "$PIP" != "NaN" ]] || [[ $EXCEPT != *"y"* ]]; then
       echo "failed"
     fi
   done
-else
-  echo "Skipping Python packages... "
 fi
 
 
