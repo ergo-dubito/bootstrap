@@ -38,6 +38,7 @@ DIRECTORIES=(
   "$HOME/.ssh"
   "$HOME/.local"
   "$HOME/.local/share"
+  "$HOME/.local/java"
   "$HOME/.config"
   "$DICT_DIR"
 )
