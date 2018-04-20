@@ -2,6 +2,7 @@
 name=Safe Remi's RPM repository for Enterprise Linux 7 - $basearch
 mirrorlist=http://cdn.remirepo.net/enterprise/7/safe/mirror
 enabled=1
+skip_if_unavailable=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi
 
@@ -9,5 +10,6 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi
 name=Remi's PHP 7.2 RPM repository for Enterprise Linux 7 - $basearch
 mirrorlist=http://cdn.remirepo.net/enterprise/7/php72/mirror
 enabled=1
+skip_if_unavailable=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-remi

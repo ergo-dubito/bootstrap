@@ -8,6 +8,7 @@ gpgcheck=1
 [puppet5-el]
 name=Puppet 5 Repository el 7 - $basearch
 baseurl=http://yum.puppetlabs.com/puppet5/el/7/$basearch
+skip_if_unavailable=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puppet5
 enabled=0
 gpgcheck=1
