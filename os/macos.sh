@@ -22,6 +22,7 @@ PACKAGES=(
   python3
   rename
   ruby
+  shellcheck
   shfmt
   ssh-copy-id
   stow
@@ -32,6 +33,7 @@ PACKAGES=(
   vim
   wget
   xz
+  youtube-dl
 )
 
 FONTS=(

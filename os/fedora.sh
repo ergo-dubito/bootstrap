@@ -106,7 +106,7 @@ function _pkgs_install {
   for package in "${PACKAGES[@]}"
   do
     echo -n "Installing $package... "
-    if sudo dnf install -yq "$package" >/dev/null 2>&1; then
+    if sudo dnf install -y -q "$package" >/dev/null 2>&1; then
       echo "done"
     else
       echo "failed"
@@ -116,7 +116,7 @@ function _pkgs_install {
 
 function _pkgs_upgrade {
   echo -n "Performing system updates... "
-  sudo dnf upgrade -yq >/dev/null 2>&1
+  sudo dnf upgrade -y -q >/dev/null 2>&1
   echo "done"
 }
 
@@ -127,12 +127,16 @@ function _pkgs_upgrade {
 
 echo ""
 echo "__ Installing Repositories __"
-if [[ $EXCEPT != *"r"* ]]; then
+if [[ $EXCEPT != *"r"* ]] || [[ $EXCEPT != *"u"* ]]; then
   install_repos
-else
-  echo "Skipping repository installs... "
+elif [[ $EXCEPT != *"u"* ]]; then
+  _repos_cleanup
 fi
 
 echo ""
 echo "__ Installing Packages __"
-install_packages
+if [[ $EXCEPT != *"p"* ]] || [[ $EXCEPT != *"u"* ]]; then
+  install_packages
+else
+  echo "Skipping package installs... "
+fi
