@@ -27,7 +27,6 @@ PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
 
-USER_MODE="$FALSE"
 EXCEPT=""
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
@@ -102,7 +101,9 @@ function clone_dotfiles_repo () {
   if "$GIT" clone "$DOTFILES_HTTPS" "$DOTFILES_DIR" >/dev/null 2>&1; then
     pushd "$DOTFILES_DIR" >/dev/null 2>&1
     "$GIT" submodule update --init --recursive >/dev/null 2>&1
-    "$GIT" remote set-url origin "$DOTFILES_GIT"
+    if [[ $EXCEPT != *"g"* ]]; then
+      "$GIT" remote set-url origin "$DOTFILES_GIT"
+    fi
     "$GIT" config core.fileMode false
     popd >/dev/null 2>&1
     echo "done"
@@ -275,14 +276,10 @@ function set_variables () {
 # Download and source OS-specific script as a sub-shell
 # ------------------------------------------------------------------------------
 function source_remote_file () {
-  if [[ USER_MODE -ne "$TRUE" ]]; then
-    f=$(mktemp)
-    curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
-    # shellcheck source=/dev/null
-    (. "$f")
-  else
-    echo "Skipping OS-specific bootstrap... "
-  fi
+  f=$(mktemp)
+  curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
+  # shellcheck source=/dev/null
+  (. "$f")
 }
 
 
@@ -323,22 +320,28 @@ function whichever () {
 # Main
 # ==============================================================================
 
-while getopts 'hux:' flag; do
+while getopts 'htux:' flag; do
   case "${flag}" in
     h )
       echo "bootstrap.sh - sets up system and configures user profile"
       echo ""
-      echo "Usage: bootstrap.sh [-hs]"
+      echo "Usage: bootstrap.sh -h | -t | -u | -x [gprsu]"
       echo ""
       echo "Options:"
       echo "-h    print help menu and exit"
-      echo "-u    user mode (skips configs that require root privileges)"
-      echo "-x    Skip the following section(s):"
-      echo "      s    SSH keys"
-      echo "      r    add repos"
+      echo "-t    dumb terminal mode;       implies -x gprsu"
+      echo "-u    user mode;                implies -x pru"
+      echo "-x    except mode: skip the following actions(s):"
+      echo "      g    adding ssh remote origin to dotfiles repo [MacOS, Linux]"
+      echo "      p    installing system packages [Linux]"
+      echo "      r    adding repos [Linux]"
+      echo "      s    generating SSH keys [MacOS, Linux]"
+      echo "      u    any sudo command [Linux]"
+      echo "      y    installing python packages [MacOS, Linux]"
       exit 0
       ;;
-    u ) USER_MODE="$TRUE" ;;
+    t ) EXCEPT="gprsu" ;;
+    u ) EXCEPT="pru" ;;
     x ) EXCEPT="$OPTARG" ;;
     \?) exit 1 ;;
   esac
@@ -442,7 +445,7 @@ fi
 echo ""
 echo "__ Installing Python Packages __"
 
-if [[ "$PIP" != "NaN" ]]; then
+if [[ "$PIP" != "NaN" ]] || [[ $EXCEPT != *"y"* ]]; then
   for pypkg in "${PYTHON_PACKAGES[@]}"
   do
     echo -n "Installing $pypkg... "
