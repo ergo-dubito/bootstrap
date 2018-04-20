@@ -13,9 +13,15 @@ Bootstraps MacOS and RedHat-based distros.
 
 `curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -u | [-x s]]`
 
-* `-u` user mode: skips any command that executes with sudo; i.e. should only affect user profile.
-* `-x` except mode: skips specific bootstrap sections:
-	* `s` creating ssh keys
+* `-t` dumb terminal mode; implies `-x gprsu`
+* `-u` user mode; implies `-x pru`
+* `-x` except mode: skip the following actions(s):
+  * `g`    adding ssh remote origin to dotfiles repo [MacOS, Linux]
+  * `p`    installing system packages [Linux]
+  * `r`    adding repos [Linux]
+  * `s`    generating SSH keys [MacOS, Linux]
+  * `u`    any sudo command [Linux]
+  * `y`    installing python packages [MacOS, Linux]
 
 ## Post Bootstrap
 
