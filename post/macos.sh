@@ -15,6 +15,8 @@ MAS_APPS=(
   924726344
   # Evernote
   406056744
+  # Microsoft Remote Desktop
+  715768417
   # PasteBot
   1179623856
   # Pixelmator
