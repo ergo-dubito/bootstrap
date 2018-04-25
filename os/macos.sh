@@ -229,6 +229,9 @@ function _defaults_desktop {
   # Show Finder breadcrumb menu
   defaults write com.apple.finder ShowPathbar -bool true
 
+  # Disable the warning before emptying the Trash
+  defaults write com.apple.finder WarnOnEmptyTrash -bool false
+
   # Disable the warning when changing a file extension
   defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
