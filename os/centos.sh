@@ -19,6 +19,7 @@ REPOSITORIES=(
 PACKAGES=(
   docker-ce
   epel-release
+  expect
   git
   htop
   mosh
