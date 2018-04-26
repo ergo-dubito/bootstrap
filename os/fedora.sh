@@ -21,6 +21,7 @@ REPOSITORIES=(
 PACKAGES=(
   bluefish
   docker-ce
+  expect
   ffmpeg
   git
   google-chrome-stable
