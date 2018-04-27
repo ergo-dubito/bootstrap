@@ -192,6 +192,8 @@ function get_operating_system () {
     OS="centos"
   elif [ -f /etc/redhat-release ]; then
     OS="redhat"
+  elif [ -f /etc.defaults/VERSION ]; then
+    OS="dsm" # Synology NAS
   else
     echo "failed"
     exit 1
@@ -274,10 +276,16 @@ function set_variables () {
 # Download and source OS-specific script as a sub-shell
 # ------------------------------------------------------------------------------
 function source_remote_file () {
-  f=$(mktemp)
-  curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
-  # shellcheck source=/dev/null
-  (. "$f")
+  local script="$BOOTSTRAP_URL/os/$OS.sh"
+
+  if wget --spider "$script" >/dev/null 2>&1; then
+    f=$(mktemp)
+    curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
+    # shellcheck source=/dev/null
+    (. "$f")
+  else
+    echo "OS script not found, skipping... "
+  fi
 }
 
 
