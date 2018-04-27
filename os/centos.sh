@@ -59,7 +59,7 @@ function _repos_import_gpgkeys {
 }
 
 function _repos_add {
-  sudo yum -yq install yum-utils >/dev/null
+  sudo yum -y -q install yum-utils >/dev/null
 
   for repo in "${REPOSITORIES[@]}"
   do
