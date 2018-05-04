@@ -3,9 +3,6 @@ Bootstraps MacOS and RedHat-based distros.
 
 ## Pre Bootstrap
 
-### AWS
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/aws.sh | bash -s -- -u [username]`
-
 ### Linux
 `sudo bash -c "echo '%wheel  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
 
@@ -13,6 +10,14 @@ Bootstraps MacOS and RedHat-based distros.
 `sudo bash -c "echo '%admin  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
 
 ## Bootstrap
+
+### AWS
+
+The AWS script acts as a wrapper to create and grant `sudo` access to `[username]`. It then runs the regular bootstrap script as the new user.
+
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/aws.sh | sudo bash -s -- -u [username]`
+
+### Linux & MacOS
 
 `curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -t | -u | [-x gprsuy]]`
 
