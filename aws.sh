@@ -2,10 +2,19 @@
 
 set -eu
 
-echo -n "Creating user ${USER_ACCOUNT}... "
-if sudo useradd -g wheel "$USER_ACCOUNT" >/dev/null 2>&1; then
-  echo "done"
-else
-  echo "failed"
-  exit 1
-fi
+echo "Creating user ${USER_ACCOUNT}... "
+echo ""
+useradd -g wheel "$USER_ACCOUNT"
+
+echo ""
+echo "Creating custom sudoers file... "
+echo ""
+
+cat << EOF > /etc/sudoers.d/100-custom-users
+# Created by $USER $(date --rfc-2822)
+
+# Group rules
+%wheel ALL=(ALL) NOPASSWD: ALL
+
+# User rules for local users
+EOF
