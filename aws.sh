@@ -18,7 +18,7 @@ cat << EOF > /etc/sudoers.d/100-custom-users
 %wheel ALL=(ALL) NOPASSWD: ALL
 
 # User rules
-Defaults:bfrank    !authenticate
+Defaults:$USER_ACCOUNT    !authenticate
 EOF
 
-sudo su - bfrank -c "curl -fsSL $BOOTURL | bash -s -- -x gs"
+sudo su - "$USER_ACCOUNT" -c "curl -fsSL $BOOTURL | bash -s -- -x gs"
