@@ -14,8 +14,9 @@ set -eu
 TRUE=0
 FALSE=1
 
-OS=""
+EXCEPT=""
 
+OS=""
 DATE=$(date +%Y%m%d%H%M%S)
 HOSTNAME=$(hostname)
 
@@ -26,8 +27,6 @@ DICT="$DICT_DIR/words"
 PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE="$FALSE"
-
-EXCEPT=""
 
 PATHS=("$HOME/.local/bin" "/usr/local/bin" "/usr/bin" "/bin")
 BIN_PATH="NaN"
@@ -41,6 +40,7 @@ DIRECTORIES=(
   "$HOME/.config"
   "$DICT_DIR"
 )
+
 
 #
 # External
@@ -289,6 +289,23 @@ function source_remote_file () {
 
 
 # ------------------------------------------------------------------------------
+# Stows all packages in the dotfiles repo
+# ------------------------------------------------------------------------------
+function stow_all () {
+  local flags="$1"
+  shopt -s nullglob
+  stow_packages=(*/)
+
+  for pkg in "${stow_packages[@]}"; do
+    _pkg=$(echo "$pkg" | cut -d '/' -f 1)
+    echo -n "Stowing $_pkg... "
+    "$STOW" -d "$DOTFILES_DIR" -t "$HOME" "$flags" "$_pkg"
+    echo "done"
+  done
+}
+
+
+# ------------------------------------------------------------------------------
 # Create an empty file and chmod it
 # ------------------------------------------------------------------------------
 function touch_file () {
@@ -334,8 +351,8 @@ while getopts 'htux:' flag; do
       echo ""
       echo "Options:"
       echo "-h    print help menu and exit"
-      echo "-t    dumb terminal mode;       implies -x gprsu"
-      echo "-u    user mode;                implies -x pru"
+      echo "-t    dumb terminal mode; implies -x gprsu"
+      echo "-u    user mode;          implies -x pru"
       echo "-x    except mode: skip the following actions(s):"
       echo "      g    adding ssh remote origin to dotfiles repo [MacOS, Linux]"
       echo "      p    installing system packages [Linux]"
@@ -358,20 +375,20 @@ echo "__ Starting Bootstrap __"
 
 
 # ------------------------------------------------------------------------------
+# Find OS; run OS-specific bootstrap; set certain PATH variables
+# ------------------------------------------------------------------------------
+get_operating_system
+source_remote_file
+set_variables
+
+
+# ------------------------------------------------------------------------------
 # Misc items
 # ------------------------------------------------------------------------------
 for directory in "${DIRECTORIES[@]}"
 do
   if [[ ! -d "$directory" ]]; then mkdir "$directory"; fi
 done
-
-
-# ------------------------------------------------------------------------------
-# Find OS; run OS-specific bootstrap; set certain PATH variables
-# ------------------------------------------------------------------------------
-get_operating_system
-source_remote_file
-set_variables
 
 
 # ------------------------------------------------------------------------------
@@ -501,28 +518,15 @@ popd >/dev/null 2>&1
 # Stow packages
 # ------------------------------------------------------------------------------
 pushd "$DOTFILES_DIR" >/dev/null 2>&1
-shopt -s nullglob
 
 if git branch -a | grep -qE "$HOSTNAME" >/dev/null 2>&1; then
+  # For idempotency: local hostname branch already exists
   "$GIT" checkout master >/dev/null 2>&1
-  stow_packages=(*/)
-
-  for pkg in "${stow_packages[@]}"; do
-    _pkg=$(echo "$pkg" | cut -d '/' -f 1)
-    echo -n "Stowing $_pkg... "
-    "$STOW" -d "$DOTFILES_DIR" -t "$HOME" "$_pkg"
-    echo "done"
-  done
+  stow_all ""
 else
+  # Create a local branch for this host; then adopt current configs
   "$GIT" checkout -b "$HOSTNAME" >/dev/null 2>&1
-  stow_packages=(*/)
-
-  for pkg in "${stow_packages[@]}"; do
-    _pkg=$(echo "$pkg" | cut -d '/' -f 1)
-    echo -n "Stowing $_pkg... "
-    "$STOW" -d "$DOTFILES_DIR" -t "$HOME" --adopt "$_pkg"
-    echo "done"
-  done
+  stow_all "--adopt"
 
   "$GIT" add -A >/dev/null 2>&1
   if git commit --dry-run >/dev/null 2>&1; then
