@@ -165,7 +165,8 @@ function generate_sshkey () {
     echo -n "Generating $1 SSH key... "
 
     comment="${USER}@${HOSTNAME}"
-    passphrase=$(<"$PASSPHRASE_FILE" tr -d '\n')
+    passphrase=$(< "$PASSPHRASE_FILE" tr -d '\n')
+
     ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" >/dev/null 2>&1
 
     echo "done"
@@ -192,8 +193,6 @@ function get_operating_system () {
     OS="centos"
   elif [ -f /etc/redhat-release ]; then
     OS="redhat"
-  elif [ -f /etc.defaults/VERSION ]; then
-    OS="dsm" # Synology NAS
   else
     echo "failed"
     exit 1
@@ -278,7 +277,7 @@ function set_variables () {
 function source_remote_file () {
   local script="$BOOTSTRAP_URL/os/$OS.sh"
 
-  if wget --spider "$script" >/dev/null 2>&1; then
+  if curl --output /dev/null --silent --head --fail $script; then
     f=$(mktemp)
     curl -o "$f" -s -L "$BOOTSTRAP_URL/os/$OS.sh"
     # shellcheck source=/dev/null
