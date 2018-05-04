@@ -2,6 +2,13 @@
 
 set -eu
 
+while getopts 'u:' flag; do
+  case "${flag}" in
+    u ) USER_ACCOUNT="$OPTARG" ;;
+    \?) exit 1 ;;
+  esac
+done
+
 echo "Creating user ${USER_ACCOUNT}... "
 echo ""
 useradd -g wheel "$USER_ACCOUNT"
