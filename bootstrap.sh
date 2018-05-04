@@ -534,6 +534,8 @@ else
     "$GIT" commit -m "Default dotfiles for $HOSTNAME." >/dev/null 2>&1
   fi
   "$GIT" checkout master >/dev/null 2>&1
+  # Reset submodules to dotfiles-specified commit
+  "$GIT" submodule foreach git checkout . >/dev/null 2>&1
 fi
 
 popd >/dev/null 2>&1
@@ -580,7 +582,7 @@ if [[ $EXCEPT != *"s"* ]]; then
   keys=(*.pub)
 
   for key in "${keys[@]}"; do
-    publickey=$(<"$HOME"/.ssh/"$key" tr -d '\n')
+    publickey=$(< "$HOME"/.ssh/"$key" tr -d '\n')
 
     if ! grep -rq "$publickey" "$authkeys"; then
       echo -n "Adding $key... "
