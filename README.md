@@ -3,6 +3,9 @@ Bootstraps MacOS and RedHat-based distros.
 
 ## Pre Bootstrap
 
+### AWS
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/aws.sh | bash -s -- -u [username]`
+
 ### Linux
 `sudo bash -c "echo '%wheel  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
 
