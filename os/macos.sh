@@ -169,8 +169,8 @@ function _defaults_app {
 
   # ==== Mail ====
 
-  # Show Mail attachments as icons
-  defaults write com.apple.mail DisableInlineAttachmentViewing -bool yes
+  # Show most recent messages at the top
+  defaults write com.apple.mail ConversationViewSortDescending -int 1
 
   # ==== Safari ====
 
