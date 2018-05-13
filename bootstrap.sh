@@ -403,9 +403,7 @@ install_stow
 echo ""
 echo "__ Finding Executable Paths __"
 
-#
 # pip
-#
 echo -n "Looking for $PIP... "
 whichever "$PIP"
 
@@ -418,9 +416,7 @@ else
   echo "failed"
 fi
 
-#
 # git
-#
 echo -n "Looking for git... "
 whichever "git"
 
@@ -432,9 +428,7 @@ else
   exit 1
 fi
 
-#
 # stow
-#
 echo -n "Looking for stow... "
 whichever "stow"
 
@@ -446,9 +440,7 @@ else
   exit 1
 fi
 
-#
 # shuf
-#
 echo -n "Looking for $SHUF... "
 whichever "$SHUF"
 
@@ -610,6 +602,13 @@ fi
 # ------------------------------------------------------------------------------
 echo ""
 echo "__ Finishing Up __"
+
+genbashstartups="${HOME}/.local/bin/generate-bash-startup"
+if [[ -x "$genbashstartups" ]]; then
+  if ! "$genbashstartups"; then
+    echo " * Failed to make bash startup files!"
+  fi
+fi
 
 if [[ "$PASSPHRASE_SAVE" -eq "$TRUE" ]]; then
   echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
