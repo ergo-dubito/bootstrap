@@ -7,6 +7,7 @@
 BREW_URL="https://raw.githubusercontent.com/Homebrew/install/master/install"
 
 PACKAGES=(
+  awscli
   bash-completion2
   bash-git-prompt
   cabextract
