@@ -28,6 +28,7 @@ PACKAGES=(
   HandBrake-cli
   htop
   libmp4v2
+  mediawriter
   mkvtoolnix
   mosh
   mpv
