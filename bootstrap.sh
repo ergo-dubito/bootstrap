@@ -24,6 +24,8 @@ DICT_TMP="$(mktemp)"
 DICT_DIR="$HOME/.local/share/dict"
 DICT="$DICT_DIR/words"
 
+BASH_DOTFILES_SCRIPT="$HOME/.local/bin/generate-bash-startup"
+
 PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
 PASSPHRASE_SAVE=$FALSE
@@ -176,8 +178,8 @@ function clone_repos () {
 
   for repo in "${GIT_REPOS[@]}"
   do
-    repo_name=$(basename $repo)
-    repo_owner=$(echo $repo | awk -F '/' '{print $4}')
+    repo_name=$(basename "$repo")
+    repo_owner=$(echo "$repo" | awk -F '/' '{print $4}')
     repo_dir="$HOME/Development/Projects/${repo_owner}__${repo_name%.*}"
 
     echo -n "Cloning repo $repo_name... "
@@ -469,10 +471,6 @@ set_variables
 # Install stow if not present on the system
 install_stow
 
-# Clone Git repos for various development resources
-clone_repos
-
-
 # ------------------------------------------------------------------------------
 # Set paths for various packages
 # ------------------------------------------------------------------------------
@@ -674,17 +672,30 @@ fi
 
 
 # ------------------------------------------------------------------------------
-# Exit
+# Post-bootstrap
 # ------------------------------------------------------------------------------
 echo ""
 echo "__ Finishing Up __"
 
-genbashstartups="$HOME/.local/bin/generate-bash-startup"
-if [[ -x "$genbashstartups" ]]; then
-  if ! "$genbashstartups"; then
-    echo " * Failed to make bash startup files!"
+# Clone Git repos for various development resources
+clone_repos
+
+# Generate .bashrc and .bash_profile
+echo -n "Generating .bashrc and .bash_profile... "
+if [[ -x "$BASH_DOTFILES_SCRIPT" ]]; then
+  if "$BASH_DOTFILES_SCRIPT"; then
+    echo "done"
+  else
+    echo "failed"
   fi
 fi
+
+
+# ------------------------------------------------------------------------------
+# Display results
+# ------------------------------------------------------------------------------
+echo ""
+echo "__ Results __"
 
 if [[ "$PASSPHRASE_SAVE" -eq $TRUE ]]; then
   echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
