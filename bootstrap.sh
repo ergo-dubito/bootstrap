@@ -565,9 +565,9 @@ else
   echo -n "Updating repo... "
   if "$GIT" checkout master &>/dev/null; then
     if "$GIT" pull &>/dev/null; then
+      echo "done"
       add_git_hooks
       fix_permissions
-      echo "done"
     else
       echo "failed"
     fi
