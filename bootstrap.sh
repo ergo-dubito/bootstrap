@@ -24,7 +24,7 @@ DICT_TMP="$(mktemp)"
 DICT_DIR="$HOME/.local/share/dict"
 DICT="$DICT_DIR/words"
 
-BASH_DOTFILES_SCRIPT="$HOME/.local/bin/generate-bash-startup"
+BASH_DOTFILES_SCRIPT="$HOME/.local/bin/generate-dotfiles"
 
 PASSPHRASE_FILE="$HOME/.ssh/passphrase-$DATE"
 PASSPHRASE_WORDS=4
@@ -53,7 +53,6 @@ BIN_PATH="NaN"
 # │   │   ├── dict
 # │   │   │   └── doc
 # │   │   ├── doc
-# │   │   ├── dotfiles
 # │   │   └── man
 # │   │       ├── man1
 # │   │       ├── man2
