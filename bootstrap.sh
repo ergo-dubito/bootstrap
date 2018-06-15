@@ -94,6 +94,7 @@ STOW_URL="https://ftp.gnu.org/gnu/stow/stow-latest.tar.gz"
 
 GIT_REPOS=(
   "$GH_URL/chriskempson/tomorrow-theme.git"
+  "$GH_URL/Relaxed-Theme/relaxed-terminal-themes.git"
 )
 
 
