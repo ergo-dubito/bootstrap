@@ -10,11 +10,22 @@ PACKAGES=(
   awscli
   bash-completion2
   bash-git-prompt
+  binutils
   cabextract
   coreutils
+  diffutils
+  findutils
+  gawk
   git
   git-flow
+  gnu-sed
+  gnu-tar
+  gnu-which
+  grep
+  gzip
   heroku
+  less
+  make
   markdown
   mas
   mosh
@@ -23,6 +34,7 @@ PACKAGES=(
   p7zip
   python3
   rename
+  rsync
   ruby
   shellcheck
   shfmt
@@ -33,6 +45,7 @@ PACKAGES=(
   tmux
   tree
   vim
+  watch
   wget
   xz
   youtube-dl
