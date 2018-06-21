@@ -23,6 +23,7 @@ PACKAGES=(
   git
   htop
   mosh
+  most
   ncdu
   nmap
   perf

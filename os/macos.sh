@@ -29,6 +29,7 @@ PACKAGES=(
   markdown
   mas
   mosh
+  most
   ncdu
   nmap
   p7zip

@@ -31,6 +31,7 @@ PACKAGES=(
   mediawriter
   mkvtoolnix
   mosh
+  most
   mpv
   ncdu
   nmap
