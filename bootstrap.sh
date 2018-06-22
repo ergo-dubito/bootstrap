@@ -40,6 +40,7 @@ BIN_PATH="NaN"
 # │   ├── Clients
 # │   ├── Home
 # │   ├── Projects
+# │   ├── Scratch
 # │   └── Snippets
 # ├── .config
 # │   └── dotfiles
@@ -68,8 +69,8 @@ BIN_PATH="NaN"
 #
 
 DIRECTORIES=(
-  "$HOME/Development/{Clients,Home,Projects,Snippets}"
-  "$HOME/.config/dotfiles"
+  "$HOME/Development/{Clients,Home,Projects,Scratch,Snippets}"
+  "$HOME/.config/dotfiles/archive"
   "$HOME/.local/{bin,etc,include,lib,opt,share/{bash,doc,man/man{1..9}},var}"
   "$HOME/.ssh"
   "$DICT_DIR"
@@ -136,10 +137,24 @@ function add_git_hooks () {
 # Builds the ~/.local and ~/Development trees
 # ------------------------------------------------------------------------------
 function build_local_tree () {
+  echo -n "Building directory structure... "
+
   for directory in "${DIRECTORIES[@]}"
   do
-    if [[ ! -d "$directory" ]]; then mkdir -p "$directory"; fi
+    if [[ -L "$directory" ]]; then
+      rm -f "$directory" &>/dev/null
+    fi
+
+    if [[ -f "$directory" ]]; then
+      pushd "$(dirname $directory)" &>/dev/null
+      mv "$(basename $directory)"{,.bak} &>/dev/null
+      popd &>/dev/null
+    fi
+
+    mkdir -p "$directory"
   done
+
+  echo "done"
 }
 
 
@@ -699,12 +714,6 @@ echo "__ Results __"
 
 if [[ "$PASSPHRASE_SAVE" -eq $TRUE ]]; then
   echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
-fi
-
-if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then
-  echo " * Add id_ed25519 key to GitHub"
-elif [[ -f "$HOME/.ssh/id_rsa.pub" ]]; then
-  echo " * Add id_rsa key to GitHub"
 fi
 
 if [[ "$OS" == "macos" ]]; then
