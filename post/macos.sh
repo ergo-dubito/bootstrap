@@ -32,6 +32,7 @@ MAS_APPS=(
 CASKS=(
   1password
   anaconda
+  anaconda2
   appcleaner
   bartender
   box-sync
@@ -93,6 +94,7 @@ done
 echo "Installing Homebrew casks... "
 
 brew tap caskroom/cask
+brew tap homebrew/cask-versions
 
 for cask in "${CASKS[@]}"
 do
