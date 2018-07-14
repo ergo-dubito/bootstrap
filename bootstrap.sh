@@ -146,8 +146,8 @@ function build_local_tree () {
     fi
 
     if [[ -f "$directory" ]]; then
-      pushd "$(dirname $directory)" &>/dev/null
-      mv "$(basename $directory)"{,.bak} &>/dev/null
+      pushd "$(dirname "$directory")" &>/dev/null
+      mv "$(basename "$directory")"{,.bak} &>/dev/null
       popd &>/dev/null
     fi
 
@@ -257,10 +257,12 @@ function generate_sshkey () {
     comment="$USER@$HOSTNAME"
     passphrase=$(< "$PASSPHRASE_FILE" tr -d '\n')
 
-    ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" &>/dev/null
-
-    echo "done"
-    PASSPHRASE_SAVE=$TRUE
+    if ssh-keygen -t "$1" -b 4096 -N "$passphrase" -C "$comment" -f "$file" -q; then
+      echo "done"
+      PASSPHRASE_SAVE=$TRUE
+    else
+      echo "failed"
+    fi
   fi
 }
 
@@ -440,13 +442,14 @@ while getopts 'htux:' flag; do
     h )
       echo "bootstrap.sh - sets up system and configures user profile"
       echo ""
-      echo "Usage: bootstrap.sh -h | -t | -u | -x [gprsu]"
+      echo "Usage: bootstrap.sh -h | -t | -u | -x [cgprsuy]"
       echo ""
       echo "Options:"
       echo "-h    print help menu and exit"
-      echo "-t    dumb terminal mode; implies -x gprsu"
+      echo "-t    dumb terminal mode; implies -x cgprsu"
       echo "-u    user mode;          implies -x pru"
       echo "-x    except mode: skip the following actions(s):"
+      echo "      c    cloning utility repos (themes, etc) [MacOS, Linux]"
       echo "      g    adding ssh remote origin to dotfiles repo [MacOS, Linux]"
       echo "      p    installing system packages [Linux]"
       echo "      r    adding repos [Linux]"
@@ -693,7 +696,9 @@ echo ""
 echo "__ Finishing Up __"
 
 # Clone Git repos for various development resources
-clone_repos
+if [[ "$EXCEPT" != *"c"* ]]; then
+  clone_repos
+fi
 
 # Generate .bashrc and .bash_profile
 echo -n "Generating .bashrc and .bash_profile... "
