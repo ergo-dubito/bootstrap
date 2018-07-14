@@ -59,7 +59,7 @@ PACKAGES=(
 
 function install_repos {
   # Ensure dnf plugins package is installed
-  sudo dnf -yq install dnf-plugins-core >/dev/null
+  sudo dnf -y -q install dnf-plugins-core
 
   _repos_import_gpgkeys
   _repos_add
@@ -79,8 +79,7 @@ function _repos_import_gpgkeys {
 function _repos_add {
   for repo in "${REPOSITORIES[@]}"
   do
-    reponame=$(basename -s .repo "$repo")
-    echo -n "Adding repository $reponame... "
+    echo -n "Adding repository $(basename -s .repo "$repo")... "
     sudo dnf config-manager --add-repo="$repo" >/dev/null
     echo "done"
   done
@@ -88,15 +87,15 @@ function _repos_add {
 
 function _repos_enable {
   echo -n "Enabling Fedora-specific repos... "
-  sudo dnf config-manager --enablerepo docker-ce-stable-fedora >/dev/null 2>&1
-  sudo dnf config-manager --enablerepo puppet5-el >/dev/null 2>&1
+  sudo dnf config-manager --enablerepo docker-ce-stable-fedora &>/dev/null
+  sudo dnf config-manager --enablerepo puppet5-el &>/dev/null
   echo "done"
 }
 
 function _repos_cleanup {
   echo -n "Cleaning up repo cache... "
-  sudo dnf clean all >/dev/null
-  sudo dnf makecache >/dev/null
+  sudo dnf clean all &>/dev/null
+  sudo dnf makecache &>/dev/null
   echo "done"
 }
 
@@ -109,7 +108,7 @@ function _pkgs_install {
   for package in "${PACKAGES[@]}"
   do
     echo -n "Installing $package... "
-    if sudo dnf install -y -q "$package" >/dev/null 2>&1; then
+    if sudo dnf install -y -q "$package"; then
       echo "done"
     else
       echo "failed"
@@ -119,7 +118,7 @@ function _pkgs_install {
 
 function _pkgs_upgrade {
   echo -n "Performing system updates... "
-  sudo dnf upgrade -y -q >/dev/null 2>&1
+  sudo dnf upgrade -y -q &>/dev/null
   echo "done"
 }
 
@@ -134,6 +133,8 @@ if [[ $EXCEPT != *"r"* ]] || [[ $EXCEPT != *"u"* ]]; then
   install_repos
 elif [[ $EXCEPT != *"u"* ]]; then
   _repos_cleanup
+else
+  echo "Skipping repository installs... "
 fi
 
 echo ""
