@@ -18,6 +18,7 @@ PACKAGES=(
   gawk
   git
   git-flow
+  glances
   gnu-sed
   gnu-tar
   gnu-which

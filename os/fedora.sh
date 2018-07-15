@@ -24,6 +24,7 @@ PACKAGES=(
   expect
   ffmpeg
   git
+  glances
   google-chrome-stable
   HandBrake-cli
   htop

@@ -21,6 +21,7 @@ PACKAGES=(
   epel-release
   expect
   git
+  glances
   htop
   mosh
   most

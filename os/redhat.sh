@@ -20,6 +20,7 @@ PACKAGES=(
   docker-ce
   epel-release
   git
+  glances
   htop
   mosh
   most
