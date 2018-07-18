@@ -25,6 +25,7 @@ PACKAGES=(
   grep
   gzip
   heroku
+  hh
   less
   make
   markdown
