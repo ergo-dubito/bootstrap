@@ -715,5 +715,8 @@ if [[ "$OS" == "macos" ]]; then
   echo " * Run post-bootstrap"
 fi
 
+# shellcheck source=/dev/null
+. "$HOME/.bash_profile"
+
 echo ""
 exit 0
