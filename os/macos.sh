@@ -37,6 +37,7 @@ PACKAGES=(
   p7zip
   python3
   rename
+  rpm2cpio
   rsync
   ruby
   shellcheck

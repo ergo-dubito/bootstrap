@@ -26,7 +26,6 @@ PACKAGES=(
   git
   glances
   google-chrome-stable
-  HandBrake-cli
   htop
   libmp4v2
   mediawriter
@@ -41,6 +40,7 @@ PACKAGES=(
   p7zip-plugins
   powerline-fonts
   python3
+  rpm2cpio
   seahorse
   stow
   strace
@@ -72,7 +72,7 @@ function _repos_import_gpgkeys {
   for gpgkey in "${GPG_KEYS[@]}"
   do
     echo -n "Importing $(basename "$gpgkey")... "
-    sudo rpm --import "$gpgkey" >/dev/null
+    sudo rpm --import "$gpgkey" &>/dev/null
     echo "done"
   done
 }
@@ -81,15 +81,15 @@ function _repos_add {
   for repo in "${REPOSITORIES[@]}"
   do
     echo -n "Adding repository $(basename -s .repo "$repo")... "
-    sudo dnf config-manager --add-repo="$repo" >/dev/null
+    sudo dnf config-manager --add-repo="$repo" &>/dev/null
     echo "done"
   done
 }
 
 function _repos_enable {
   echo -n "Enabling Fedora-specific repos... "
-  sudo dnf config-manager --enablerepo docker-ce-stable-fedora &>/dev/null
-  sudo dnf config-manager --enablerepo puppet5-el &>/dev/null
+  sudo dnf config-manager --set-enabled docker-ce-stable-fedora &>/dev/null
+  sudo dnf config-manager --set-enabled puppet5-el &>/dev/null
   echo "done"
 }
 
@@ -109,7 +109,7 @@ function _pkgs_install {
   for package in "${PACKAGES[@]}"
   do
     echo -n "Installing $package... "
-    if sudo dnf install -y -q "$package"; then
+    if sudo dnf install -y -q "$package" &>/dev/null; then
       echo "done"
     else
       echo "failed"

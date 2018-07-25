@@ -29,6 +29,7 @@ PACKAGES=(
   perf
   p7zip
   p7zip-plugins
+  rpm2cpio
   stow
   strace
   tmux
