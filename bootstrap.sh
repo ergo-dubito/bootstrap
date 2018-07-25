@@ -141,17 +141,7 @@ function build_local_tree () {
 
   for directory in "${DIRECTORIES[@]}"
   do
-    if [[ -L "$directory" ]]; then
-      rm -f "$directory" &>/dev/null
-    fi
-
-    if [[ -f "$directory" ]]; then
-      pushd "$(dirname "$directory")" &>/dev/null
-      mv "$(basename "$directory")"{,.bak} &>/dev/null
-      popd &>/dev/null
-    fi
-
-    mkdir -p "$directory"
+    eval "mkdir -p $directory"
   done
 
   echo "done"
@@ -458,7 +448,7 @@ while getopts 'htux:' flag; do
       echo "      y    installing python packages [MacOS, Linux]"
       exit 0
       ;;
-    t ) EXCEPT="gprsu" ;;
+    t ) EXCEPT="cgprsu" ;;
     u ) EXCEPT="pru" ;;
     x ) EXCEPT="$OPTARG" ;;
     \?) exit 1 ;;
