@@ -9,6 +9,7 @@ GPG_KEYS=(
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-docker-ce"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-google-chrome"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-puppet5"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-dropbox"
 )
 
 REPOSITORIES=(
@@ -16,9 +17,11 @@ REPOSITORIES=(
   "$BOOTSTRAP_ASSETS/repos.d/docker-ce.repo"
   "$BOOTSTRAP_ASSETS/repos.d/google-chrome.repo"
   "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/dropbox.repo"
 )
 
 PACKAGES=(
+  adobe-source-*-fonts
   bluefish
   docker-ce
   expect
@@ -33,6 +36,7 @@ PACKAGES=(
   mosh
   most
   mpv
+  nautilus-dropbox*
   ncdu
   nmap
   perf
@@ -96,6 +100,9 @@ function _repos_enable {
 function _repos_cleanup {
   echo -n "Cleaning up repo cache... "
   sudo dnf clean all &>/dev/null
+  echo "done"
+
+  echo -n "Building new repo cache... "
   sudo dnf makecache &>/dev/null
   echo "done"
 }
