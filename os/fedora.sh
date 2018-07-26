@@ -10,6 +10,7 @@ GPG_KEYS=(
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-google-chrome"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-puppet5"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-dropbox"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-vivaldi"
 )
 
 REPOSITORIES=(
@@ -18,6 +19,7 @@ REPOSITORIES=(
   "$BOOTSTRAP_ASSETS/repos.d/google-chrome.repo"
   "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
   "$BOOTSTRAP_ASSETS/repos.d/dropbox.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/vivaldi.repo"
 )
 
 PACKAGES=(
@@ -53,6 +55,7 @@ PACKAGES=(
   tmux
   tree
   vim
+  vivaldi-stable
   wget
   xz
 )
