@@ -19,11 +19,12 @@ The AWS script acts as a wrapper to create and grant `sudo` access to `[username
 
 ### Linux & MacOS
 
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -t | -u | [-x gprsuy]]`
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -t | -u | [-x cgprsuy]]`
 
 * `-t` dumb terminal mode; implies `-x gprsu`
 * `-u` user mode; implies `-x pru`
 * `-x` except mode: skip the following actions(s):
+  * `c`    cloning utility repos (themes, etc) [MacOS, Linux]
   * `g`    adding ssh remote origin to dotfiles repo [MacOS, Linux]
   * `p`    installing system packages [Linux]
   * `r`    adding repos [Linux]

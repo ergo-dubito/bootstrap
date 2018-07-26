@@ -715,6 +715,8 @@ if [[ "$OS" == "macos" ]]; then
   echo " * Run post-bootstrap"
 fi
 
+# Source new bash profile
+echo -n "Loading new Bash profile... "
 # shellcheck source=/dev/null
 . "$HOME/.bash_profile"
 
