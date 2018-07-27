@@ -17,8 +17,8 @@ Optional arguments that can be given to the bootstrap script (follows the `bash`
 
 `-s -- [-t | -u | [-x acgprsuy] | -p]`
 
-* `-t` dumb terminal mode; implies `-x gprsu`
-* `-u` user mode; implies `-x pru`
+* `-t` dumb terminal mode; implies `-x agprsu`
+* `-u` user mode; implies `-x apru`
 * `-x` except mode: skip the following actions(s):
   * `a`    granting nopasswd privileges [MacOS, Linux]
   * `c`    cloning utility repos (themes, etc) [MacOS, Linux]
