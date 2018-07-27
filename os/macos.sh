@@ -313,6 +313,11 @@ function _defaults_desktop {
   # Disable automatically rearranging Spaces
   defaults write com.apple.dock mru-spaces -bool false
 
+  # ==== Dashboard ====
+
+  # Disable Dashboard
+  defaults write com.apple.dashboard mcx-disabled -boolean true
+
   echo "done"
 }
 
