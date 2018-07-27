@@ -46,7 +46,6 @@ PACKAGES=(
   p7zip-plugins
   powerline-fonts
   python3
-  rpm2cpio
   seahorse
   stow
   strace
