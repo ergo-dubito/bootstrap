@@ -11,7 +11,11 @@ The AWS script acts as a wrapper to create and grant `sudo` access to `[username
 
 ### Linux & MacOS
 
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- [-t | -u | [-x acgprsuy] | -p]]`
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash`
+
+Optional arguments that can be given to the bootstrap script (follows the `bash` command):
+
+`-s -- [-t | -u | [-x acgprsuy] | -p]`
 
 * `-t` dumb terminal mode; implies `-x gprsu`
 * `-u` user mode; implies `-x pru`
