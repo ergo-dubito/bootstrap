@@ -1,14 +1,6 @@
 # Bootstrap
 Bootstraps MacOS and RedHat-based distros.
 
-## Pre Bootstrap
-
-### Linux
-`sudo bash -c "echo '%wheel  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
-
-### MacOS
-`sudo bash -c "echo '%admin  ALL=(ALL)  NOPASSWD: ALL' > /etc/sudoers.d/nopasswd"`
-
 ## Bootstrap
 
 ### AWS
@@ -19,11 +11,12 @@ The AWS script acts as a wrapper to create and grant `sudo` access to `[username
 
 ### Linux & MacOS
 
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- -t | -u | [-x cgprsuy]]`
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/bootstrap.sh | bash [-s -- [-t | -u | [-x acgprsuy] | -p]]`
 
 * `-t` dumb terminal mode; implies `-x gprsu`
 * `-u` user mode; implies `-x pru`
 * `-x` except mode: skip the following actions(s):
+  * `a`    granting nopasswd privileges [MacOS, Linux]
   * `c`    cloning utility repos (themes, etc) [MacOS, Linux]
   * `g`    adding ssh remote origin to dotfiles repo [MacOS, Linux]
   * `p`    installing system packages [Linux]
@@ -31,8 +24,12 @@ The AWS script acts as a wrapper to create and grant `sudo` access to `[username
   * `s`    generating SSH keys [MacOS, Linux]
   * `u`    any sudo command [Linux]
   * `y`    installing python packages [MacOS, Linux]
+* `-p` run post-bootstrap installs [MacOS]
 
 ## Post Bootstrap
 
 ### MacOS
-`curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash [-s -- -n [hostname]]`
+
+The post-bootstrap script can be run separately:
+
+`curl -fsSL https://bradleyfrank.github.io/bootstrap/post/macos.sh | bash`

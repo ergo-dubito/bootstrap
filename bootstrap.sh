@@ -15,6 +15,7 @@ TRUE=0
 FALSE=1
 
 EXCEPT=""
+POST_RUN=$FALSE
 
 OS=""
 DATE=$(date +%Y%m%d%H%M%S)
@@ -130,6 +131,22 @@ function add_git_hooks () {
   else
     echo "failed"
   fi
+}
+
+
+# ------------------------------------------------------------------------------
+# Grants the local admin group nopasswd sudo access
+# ------------------------------------------------------------------------------
+function add_nopasswd_sudoers () {
+  local entry
+
+  if [[ "$OS" == "macos" ]]; then
+    entry="%admin ALL=(ALL) NOPASSWD: ALL"
+  else
+    entry="%wheel ALL=(ALL) NOPASSWD: ALL"
+  fi
+
+  sudo bash -c "echo '$entry' > /etc/sudoers.d/nopasswd"
 }
 
 
@@ -266,11 +283,12 @@ function get_operating_system () {
   case "$(uname -s)" in
     Darwin) OS="macos" ;;
     Linux)
-      if [ -f /etc/fedora-release ]; then
+      POST_RUN=$FALSE
+      if [[ -f /etc/fedora-release ]]; then
         OS="fedora"
-      elif [ -f /etc/centos-release ]; then
+      elif [[ -f /etc/centos-release ]]; then
         OS="centos"
-      elif [ -f /etc/redhat-release ]; then
+      elif [[ -f /etc/redhat-release ]]; then
         OS="redhat"
       else
         echo "failed"
@@ -360,7 +378,7 @@ function set_variables () {
 # Download and source OS-specific script as a sub-shell
 # ------------------------------------------------------------------------------
 function source_remote_file () {
-  local script="$BOOTSTRAP_URL/os/$OS.sh"
+  local script="$BOOTSTRAP_URL/$1/$OS.sh"
 
   if curl --output /dev/null --silent --head --fail "$script"; then
     f=$(mktemp)
@@ -368,7 +386,8 @@ function source_remote_file () {
     # shellcheck source=/dev/null
     (. "$f")
   else
-    echo "OS script not found, skipping... "
+    echo "Script $OS.sh not found, exiting... "
+    exit 1
   fi
 }
 
@@ -427,18 +446,19 @@ function whichever () {
 # Main
 # ==============================================================================
 
-while getopts 'htux:' flag; do
+while getopts 'htux:p' flag; do
   case "$flag" in
     h )
       echo "bootstrap.sh - sets up system and configures user profile"
       echo ""
-      echo "Usage: bootstrap.sh -h | -t | -u | -x [cgprsuy]"
+      echo "Usage: bootstrap.sh -h | -t | -u | -x [acgprsuy] | -p"
       echo ""
       echo "Options:"
       echo "-h    print help menu and exit"
-      echo "-t    dumb terminal mode; implies -x cgprsu"
-      echo "-u    user mode;          implies -x pru"
+      echo "-t    dumb terminal mode; implies -x acgprsu"
+      echo "-u    user mode;          implies -x apru"
       echo "-x    except mode: skip the following actions(s):"
+      echo "      a    granting nopasswd privileges [MacOS, Linux]"
       echo "      c    cloning utility repos (themes, etc) [MacOS, Linux]"
       echo "      g    adding ssh remote origin to dotfiles repo [MacOS, Linux]"
       echo "      p    installing system packages [Linux]"
@@ -446,11 +466,13 @@ while getopts 'htux:' flag; do
       echo "      s    generating SSH keys [MacOS, Linux]"
       echo "      u    any sudo command [Linux]"
       echo "      y    installing python packages [MacOS, Linux]"
+      echo "-p    run post-bootstrap installs [MacOS]"
       exit 0
       ;;
-    t ) EXCEPT="cgprsu" ;;
-    u ) EXCEPT="pru" ;;
+    t ) EXCEPT="acgprsu" ;;
+    u ) EXCEPT="apru" ;;
     x ) EXCEPT="$OPTARG" ;;
+    p ) POST_RUN=$TRUE ;;
     \?) exit 1 ;;
   esac
 done
@@ -467,11 +489,16 @@ echo "__ Starting Bootstrap __"
 # Find the OS we're running on
 get_operating_system
 
+# Grant admin group nopasswd privileges
+if [[ "$EXCEPT" != *"a"* ]]; then
+  add_nopasswd_sudoers
+fi
+
 # Make required directory structure ahead of stowing packages
 build_local_tree
 
 # Execute per-OS instructions (packages, settings, etc.)
-source_remote_file
+source_remote_file "os"
 
 # Set various per-OS variables
 set_variables
@@ -547,7 +574,7 @@ else
   for pypkg in "${PYTHON_PACKAGES[@]}"
   do
     echo -n "Installing $pypkg... "
-    if "$PIP" install -U --user "$pypkg" -qqq 2>/dev/null; then
+    if "$PIP" install -U --user "$pypkg" &>/dev/null; then
       echo "done"
     else
       echo "failed"
@@ -690,6 +717,11 @@ if [[ "$EXCEPT" != *"c"* ]]; then
   clone_repos
 fi
 
+# Run post-bootstrap script
+if [[ "$POST_RUN" -eq $TRUE ]]; then
+  source_remote_file "post"
+fi
+
 # Generate .bashrc and .bash_profile
 echo -n "Generating .bashrc and .bash_profile... "
 if [[ -x "$BASH_DOTFILES_SCRIPT" ]]; then
@@ -700,25 +732,10 @@ if [[ -x "$BASH_DOTFILES_SCRIPT" ]]; then
   fi
 fi
 
-
-# ------------------------------------------------------------------------------
-# Display results
-# ------------------------------------------------------------------------------
-echo ""
-echo "__ Results __"
-
-if [[ "$PASSPHRASE_SAVE" -eq $TRUE ]]; then
-  echo " * SSH Passphrase saved to $PASSPHRASE_FILE"
-fi
-
-if [[ "$OS" == "macos" ]]; then
-  echo " * Run post-bootstrap"
-fi
-
 # Source new bash profile
 echo -n "Loading new Bash profile... "
 # shellcheck source=/dev/null
 . "$HOME/.bash_profile"
 
-echo ""
+clear
 exit 0

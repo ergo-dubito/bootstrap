@@ -75,9 +75,9 @@ function install_homebrew {
 
 
 function _xcode_install {
-  if ! type xcode-select >/dev/null 2>&1; then
+  if ! type xcode-select &>/dev/null; then
     echo -n "Installing Xcode... "
-    if xcode-select --install >/dev/null 2>&1; then
+    if xcode-select --install &>/dev/null; then
       echo "done"
     else
       echo "failed"
@@ -88,9 +88,9 @@ function _xcode_install {
 
 
 function _brew_install {
-  if ! type brew >/dev/null 2>&1; then
+  if ! type brew &>/dev/null; then
     echo -n "Installing Homebrew... "
-    if ruby -e "$(curl -fsSL ${BREW_URL})" >/dev/null 2>&1; then
+    if ruby -e "$(curl -fsSL ${BREW_URL})" &>/dev/null; then
       echo "done"
     else
       echo "failed"
@@ -110,7 +110,7 @@ function install_packages {
 
 function _brew {
   echo -n "$2... "
-  if brew "$1" >/dev/null 2>&1; then
+  if brew "$1" &>/dev/null; then
     echo "done"
   else
     echo "failed"
@@ -123,14 +123,14 @@ function _pkgs_install {
   do
     if brew info "$package" 2>&1 | grep -Eq '^Not installed$'; then
       echo -n "Installing $package... "
-      if brew install "$package" >/dev/null 2>&1; then
+      if brew install "$package" &>/dev/null; then
         echo "done"
       else
         echo "failed"
       fi
     elif brew outdated "$package" 2>&1 | grep -q "$package"; then
       echo -n "Upgrading $package... "
-      if brew upgrade "$package" >/dev/null 2>&1; then
+      if brew upgrade "$package" &>/dev/null; then
         echo "done"
       else
         echo "failed"
@@ -149,7 +149,7 @@ function _font_install {
   do
     if brew cask info "$font" 2>&1 | grep -Eq '^Not installed$'; then
       echo -n "Installing font $font... "
-      if brew cask install "$font" >/dev/null 2>&1; then
+      if brew cask install "$font" &>/dev/null; then
         echo "done"
       else
         echo "failed"
@@ -166,6 +166,7 @@ function set_macos_defaults {
   _defaults_interface
   _defaults_io
   _defaults_system
+  _defaults_services
 
   killall Dock
 }
@@ -260,8 +261,11 @@ function _defaults_desktop {
   # Default view style
   defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
-  # Unhide user library
+  # Unhide ~/Library
   chflags nohidden ~/Library
+
+  # Unhide Volumes
+  sudo chflags nohidden /Volumes
 
   # Set default location for new windows
   defaults write com.apple.finder NewWindowTarget -string "PfLo"
@@ -394,6 +398,12 @@ function _defaults_system {
   # Grace period for requiring password to unlock
   defaults write com.apple.screensaver askForPasswordDelay -int 5
 
+  # Require admin to make System Preference changes
+  sysprefs=$(mktemp)
+  security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
+  /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
+  security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
+
   # ==== System Updates ====
 
   # Check for software updates daily
@@ -404,16 +414,51 @@ function _defaults_system {
   # Set screensaver idle time
   defaults -currentHost write com.apple.screensaver idleTime 300
 
-  # Put display to sleep after 5 Minutes of inactivity
-  sudo pmset displaysleep 5
+  # Put display to sleep after 15 Minutes of inactivity
+  sudo pmset displaysleep 15
 
-  # Put Computer to Sleep after 15 Minutes of Inactivity
-  sudo pmset sleep 15
-
-  # Set System Sleep Idle Time to 60 Minutes
-  sudo systemsetup -setcomputersleep 60
+  # Put Computer to Sleep after 30 Minutes of Inactivity
+  sudo pmset sleep 30
 
   echo "done"
+}
+
+
+function _defaults_services {
+  echo -n "Services... "
+
+  # Enable locate daemon
+  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
+
+  # Enable firewall
+  if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate | grep -q "disabled"; then
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+  fi
+
+  # Enable FileVault
+  if ! fdesetup isactive; then sudo fdesetup enable; fi
+
+  echo "done"
+}
+
+
+function enable_bash4 {
+  if [[ -x /usr/local/bin/bash ]]; then
+    echo "Adding Bash 4 to available shells... "
+
+    if ! grep -q '/usr/local/bin/bash' /etc/shells; then
+      sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
+    fi
+
+    local shell
+    shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
+
+    if [[ "$shell" != "/usr/local/bin/bash" ]]; then
+      chsh -s /usr/local/bin/bash "$(id -un)"
+    else
+      echo "Bash is up-to-date."
+    fi
+  fi
 }
 
 
@@ -434,3 +479,4 @@ install_packages
 echo ""
 echo "__ Configuring System __"
 set_macos_defaults
+enable_bash4
