@@ -56,6 +56,7 @@ PACKAGES=(
   tree
   vim
   vivaldi-stable
+  vlc
   wget
   xz
 )
