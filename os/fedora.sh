@@ -14,7 +14,7 @@ GPG_KEYS=(
 )
 
 REPOSITORIES=(
-  "$BOOTSTRAP_ASSETS/repos.d/fedora-multimedia.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/negativo17.repo"
   "$BOOTSTRAP_ASSETS/repos.d/docker-ce.repo"
   "$BOOTSTRAP_ASSETS/repos.d/google-chrome.repo"
   "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
@@ -47,6 +47,7 @@ PACKAGES=(
   powerline-fonts
   python3
   seahorse
+  spotify-client
   stow
   strace
   thefuck
