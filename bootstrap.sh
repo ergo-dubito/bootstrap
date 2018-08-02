@@ -110,6 +110,7 @@ PYTHON_PACKAGES=(
   pycodestyle
   pydf
   pylint
+  s-tui
 )
 
 
