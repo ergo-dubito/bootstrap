@@ -21,7 +21,7 @@ MAS_APPS=(
   1289378661
   # The Unarchiver
   425424353
-  # Bumbpr
+  # Bumpr
   1166066070
 )
 
