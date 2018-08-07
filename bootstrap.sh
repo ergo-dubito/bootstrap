@@ -287,10 +287,8 @@ function get_operating_system () {
       POST_RUN=$FALSE
       if [[ -f /etc/fedora-release ]]; then
         OS="fedora"
-      elif [[ -f /etc/centos-release ]]; then
+      elif [[ -f /etc/centos-release ]] || [[ -f /etc/redhat-release ]] then
         OS="centos"
-      elif [[ -f /etc/redhat-release ]]; then
-        OS="redhat"
       else
         echo "failed"
         exit 1
