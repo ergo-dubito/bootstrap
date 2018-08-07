@@ -21,6 +21,8 @@ MAS_APPS=(
   1289378661
   # The Unarchiver
   425424353
+  # Bumbpr
+  1166066070
 )
 
 CASKS=(
@@ -84,7 +86,3 @@ for app in "${MAS_APPS[@]}"
 do
   mas install "$app"
 done
-
-
-
-
