@@ -28,9 +28,10 @@ MAS_APPS=(
 CASKS=(
   1password
   anaconda
-  anaconda2
   appcleaner
+  atom
   bartender
+  bbedit
   box-sync
   coda
   docker
