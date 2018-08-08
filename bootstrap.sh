@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # shellcheck disable=SC2164
 set -eu
@@ -287,7 +287,7 @@ function get_operating_system () {
       POST_RUN=$FALSE
       if [[ -f /etc/fedora-release ]]; then
         OS="fedora"
-      elif [[ -f /etc/centos-release ]] || [[ -f /etc/redhat-release ]] then
+      elif [[ -f /etc/centos-release ]] || [[ -f /etc/redhat-release ]]; then
         OS="centos"
       else
         echo "failed"
