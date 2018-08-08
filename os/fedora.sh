@@ -11,6 +11,7 @@ GPG_KEYS=(
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-puppet5"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-dropbox"
   "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-vivaldi"
+  "$BOOTSTRAP_ASSETS/gpg/RPM-GPG-KEY-atom"
 )
 
 REPOSITORIES=(
@@ -20,10 +21,12 @@ REPOSITORIES=(
   "$BOOTSTRAP_ASSETS/repos.d/puppet5.repo"
   "$BOOTSTRAP_ASSETS/repos.d/dropbox.repo"
   "$BOOTSTRAP_ASSETS/repos.d/vivaldi.repo"
+  "$BOOTSTRAP_ASSETS/repos.d/atom.repo"
 )
 
 PACKAGES=(
   adobe-source-*-fonts
+  atom
   bluefish
   docker-ce
   expect
