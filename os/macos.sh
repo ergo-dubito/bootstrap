@@ -37,6 +37,7 @@ PACKAGES=(
   p7zip
   pycharm-ce
   python3
+  ranger
   rename
   rpm2cpio
   rsync
