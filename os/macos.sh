@@ -35,7 +35,7 @@ PACKAGES=(
   ncdu
   nmap
   p7zip
-  python3
+  python
   ranger
   rename
   rpm2cpio
