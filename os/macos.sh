@@ -163,7 +163,6 @@ function _font_install {
 function set_macos_defaults {
   _defaults_app
   _defaults_desktop
-  _defaults_filesystem
   _defaults_interface
   _defaults_io
   _defaults_system
