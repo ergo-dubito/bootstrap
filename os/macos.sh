@@ -428,15 +428,12 @@ function _defaults_services {
   echo -n "Services... "
 
   # Enable locate daemon
-  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
+  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist &>/dev/null
 
   # Enable firewall
   if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate | grep -q "disabled"; then
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on &>/dev/null
   fi
-
-  # Enable FileVault
-  if ! fdesetup isactive; then sudo fdesetup enable; fi
 
   echo "done"
 }

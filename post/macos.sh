@@ -87,3 +87,9 @@ for app in "${MAS_APPS[@]}"
 do
   mas install "$app"
 done
+
+
+#
+# Enable FileVault
+#
+if ! fdesetup isactive; then sudo fdesetup enable; fi
