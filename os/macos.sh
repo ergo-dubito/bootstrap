@@ -35,7 +35,6 @@ PACKAGES=(
   ncdu
   nmap
   p7zip
-  pycharm-ce
   python3
   ranger
   rename
