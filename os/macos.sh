@@ -166,7 +166,6 @@ function set_macos_defaults {
   _defaults_interface
   _defaults_io
   _defaults_system
-  _defaults_services
 
   killall Dock
 }
@@ -424,41 +423,6 @@ function _defaults_system {
 }
 
 
-function _defaults_services {
-  echo -n "Services... "
-
-  # Enable locate daemon
-  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist &>/dev/null
-
-  # Enable firewall
-  if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate | grep -q "disabled"; then
-    sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on &>/dev/null
-  fi
-
-  echo "done"
-}
-
-
-function enable_bash4 {
-  if [[ -x /usr/local/bin/bash ]]; then
-    echo "Adding Bash 4 to available shells... "
-
-    if ! grep -q '/usr/local/bin/bash' /etc/shells; then
-      sudo bash -c "echo '/usr/local/bin/bash' >> /etc/shells"
-    fi
-
-    local shell
-    shell=$(dscl . -read "$HOME" | grep -E '^UserShell' | awk '{print $2}')
-
-    if [[ "$shell" != "/usr/local/bin/bash" ]]; then
-      chsh -s /usr/local/bin/bash "$(id -un)"
-    else
-      echo "Bash is up-to-date."
-    fi
-  fi
-}
-
-
 # ==============================================================================
 # Main
 # ==============================================================================
@@ -474,6 +438,5 @@ install_packages
 
 
 echo ""
-echo "__ Configuring System __"
+echo "__ Setting MacOS Defaults __"
 set_macos_defaults
-enable_bash4
