@@ -92,7 +92,9 @@ done
 #
 # Enable FileVault
 #
-if ! fdesetup isactive; then sudo fdesetup enable; fi
+if ! fdesetup isactive &>/dev/null; then
+  sudo fdesetup enable -user "$USER" -defer "$HOME"/.filevault.plist
+fi
 
 
 #
