@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # ==============================================================================
 # Variables
@@ -397,15 +397,27 @@ function _defaults_system {
   # Grace period for requiring password to unlock
   defaults write com.apple.screensaver askForPasswordDelay -int 5
 
-  # ==== System Updates ====
+  # Enable firewall
+  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on &>/dev/null
 
   # Check for software updates daily
   defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+
+  # ==== System Services ====
+
+  # Enable locate database
+  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
 
   # ==== Power Settings ====
 
   # Set screensaver idle time
   defaults -currentHost write com.apple.screensaver idleTime 300
+
+  # Put display to sleep after 15 minutes of inactivity
+  sudo pmset displaysleep 15
+
+  # Put computer to sleep after 30 minutes of inactivity
+  sudo pmset sleep 30
 
   echo "done"
 }

@@ -93,21 +93,7 @@ done
 # Enable FileVault
 #
 if ! fdesetup isactive &>/dev/null; then
-  sudo fdesetup enable -user "$USER" -defer "$HOME"/.filevault.plist
-fi
-
-
-#
-# Enable locate daemon
-#
-sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
-
-
-#
-# Enable firewall
-#
-if /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate | grep -q "disabled"; then
-  sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+  sudo fdesetup enable -user "$USER"
 fi
 
 
@@ -118,14 +104,6 @@ sysprefs=$(mktemp)
 security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
 /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
 security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
-
-
-#
-# Put display to sleep after 15 minutes of inactivity
-# Put computer to sleep after 30 minutes of inactivity
-#
-sudo pmset displaysleep 15
-sudo pmset sleep 30
 
 
 #
@@ -142,7 +120,5 @@ if [[ -x /usr/local/bin/bash ]]; then
 
   if [[ "$shell" != "/usr/local/bin/bash" ]]; then
     chsh -s /usr/local/bin/bash "$(id -un)"
-  else
-    echo "Bash is up-to-date."
   fi
 fi
