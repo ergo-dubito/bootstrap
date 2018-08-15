@@ -407,12 +407,6 @@ function _defaults_system {
   # Set screensaver idle time
   defaults -currentHost write com.apple.screensaver idleTime 300
 
-  # Put display to sleep after 15 Minutes of inactivity
-  sudo pmset displaysleep 15
-
-  # Put Computer to Sleep after 30 Minutes of Inactivity
-  sudo pmset sleep 30
-
   echo "done"
 }
 

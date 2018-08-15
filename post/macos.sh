@@ -119,6 +119,14 @@ security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
 
 
 #
+# Put display to sleep after 15 minutes of inactivity
+# Put computer to sleep after 30 minutes of inactivity
+#
+sudo pmset displaysleep 15
+sudo pmset sleep 30
+
+
+#
 # Make Bash4 an available shell option
 #
 if [[ -x /usr/local/bin/bash ]]; then
