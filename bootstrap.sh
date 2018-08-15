@@ -614,6 +614,12 @@ fi
 popd &>/dev/null
 
 
+# Clone Git repos for various development resources
+if [[ "$EXCEPT" != *"c"* ]]; then
+  clone_repos
+fi
+
+
 # ------------------------------------------------------------------------------
 # Stow packages
 # ------------------------------------------------------------------------------
@@ -706,20 +712,10 @@ fi
 
 
 # ------------------------------------------------------------------------------
-# Post-bootstrap
+# Configure Bash Profile
 # ------------------------------------------------------------------------------
 echo ""
-echo "__ Finishing Up __"
-
-# Clone Git repos for various development resources
-if [[ "$EXCEPT" != *"c"* ]]; then
-  clone_repos
-fi
-
-# Run post-bootstrap script
-if [[ "$POST_RUN" -eq $TRUE ]]; then
-  source_remote_file "post"
-fi
+echo "__ Building Bash Profile __"
 
 # Generate .bashrc and .bash_profile
 echo -n "Generating .bashrc and .bash_profile... "
@@ -736,5 +732,18 @@ echo -n "Loading new Bash profile... "
 # shellcheck source=/dev/null
 . "$HOME/.bash_profile"
 
-clear
+
+# ------------------------------------------------------------------------------
+# Post-bootstrap
+# ------------------------------------------------------------------------------
+
+echo ""
+echo "__ Finishing Up __"
+
+# Run post-bootstrap script
+if [[ "$POST_RUN" -eq $TRUE ]]; then
+  clear
+  source_remote_file "post"
+fi
+
 exit 0
