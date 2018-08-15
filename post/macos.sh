@@ -110,6 +110,15 @@ fi
 
 
 #
+# Require admin to make System Preference changes
+#
+sysprefs=$(mktemp)
+security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
+/usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
+security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
+
+
+#
 # Make Bash4 an available shell option
 #
 if [[ -x /usr/local/bin/bash ]]; then

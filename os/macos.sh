@@ -397,12 +397,6 @@ function _defaults_system {
   # Grace period for requiring password to unlock
   defaults write com.apple.screensaver askForPasswordDelay -int 5
 
-  # Require admin to make System Preference changes
-  sysprefs=$(mktemp)
-  security authorizationdb read system.preferences > "$sysprefs" 2>/dev/null
-  /usr/libexec/PlistBuddy -c "Set :shared false" "$sysprefs"
-  security authorizationdb write system.preferences < "$sysprefs" 2>/dev/null
-
   # ==== System Updates ====
 
   # Check for software updates daily
